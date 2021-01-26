@@ -15,31 +15,18 @@ class node:
     def __str__(self):
         s = "id: {} \nlabel: {}".format(self.id, self.label)
         s += "\nparents: "
-        for i in self.parents:
-            s += "{} ".format(i)
+        s += '{}'.format(self.parents, sep=' ')
         s += "\nchildren: "
-        for i in self.children:
-            s += "{} ".format(i)
+        s += '{}'.format(self.children, sep=' ')
         return s
 
     def __repr__(self):
-        s = 'node({}, {},'.format(self.id, self.label)
-        s += '['
-        for i in self.parents:
-            s += '{},'.format(i)
-        s += '],'
-        s += '['
-        for i in self.children:
-            s += '{},'.format(i)
-        s += '])'
+        s = 'node({}, {}, '.format(self.id, self.label)
+        s += '{}'.format(self.parents, sep=',')
+        s += ', '
+        s += '{}'.format(self.children, sep=',')
+        s += ')'
         return s
-
-    ''' Exemple de différence entre __str__ et __repr__
-    str :
-        26/01/2021
-    repr :
-        datetime.datetime(26, 01, 2021)
-    '''
 
     def copy(self):
         return node(self.id, self.label, self.parents, self.children)
@@ -87,26 +74,22 @@ class open_digraph: # for open directed graph
 
     def __str__(self):
         s = "inputs: "
-        for i in self.inputs:
-            s += '{},'.format(i)
+        s += '{}'.format(self.inputs, sep=',')
         s += "\noutputs: "
-        for i in self.outputs:
-            s += '{},'.format(i)
+        s += '{}'.format(self.outputs, sep=',')
         s += "\nnodes: "
         for i in self.nodes:
-            s += "{}, ".format(i)
+            s += "{}, ".format(i) #Virgule
         return s
 
     def __repr__(self):
-        s = "open_digraph( ["
-        for i in self.inputs:
-            s += '{},'.format(i)
-        s += '], ['
-        for i in self.outputs:
-            s += '{},'.format(i)
-        s += '], ['
-        for i in self.nodes:
-            s += '{},'.format(i)
+        s = "open_digraph("
+        s += '{}'.format(self.inputs, sep=',')
+        s += ', '
+        s += '{}'.format(self.outputs, sep=',')
+        s += ', ['
+        for i in self.nodes.values():
+            s += "{}, ".format(repr(i)) '''Trouver un moyen d'enlever la dernière virgule'''
         s += '] )'
         return s
 
@@ -114,8 +97,7 @@ class open_digraph: # for open directed graph
         return open_digraph([],[],[])
 
     def copy(self):
-        # Il faut passer un tableau et non paramètre et pas un dictionnaire (nodes)
-        return open_digraph(self.inputs, self.outputs, [value for key, value in self.nodes.items()])
+        return open_digraph(self.inputs, self.outputs, self.nodes.values())
 
     #getters
     def get_input_ids(self):
@@ -125,32 +107,19 @@ class open_digraph: # for open directed graph
         return self.outputs
 
     def get_id_node_map(self):
-        '''
-        fruits = {4:'banane', 'pomme':'pomme rouge', 'nb':80}
-        fruits['pomme'] va renvoyer 'pomme rouge'
-        fruits['fraise'] = "j'adore les fraise" ajoute une valeur
-        for key, value in fruits.items() :
-            print(value) parcourt la liste
-        '''
-        #renvoie un dictionnaire id:node
-
-        #Problème : i est un entier (l'id du noeud)
-        return {i.get_id():i for i in self.nodes}
+        return self.nodes
 
     def get_nodes(self):
-        return [i for i in self.nodes]
+        return self.nodes.values()
 
     def get_node_ids(self):
-        #Problème : i est un entier (l'id du noeud)
-        return [i.get_id() for i in self.nodes]
+        return [i for i in self.nodes]
 
     def get_node_by_id(self, id):
-        #Forcément cassé du coup
-        return self.get_id_node_map()[id]
+        return self.nodes[id]
 
     def get_nodes_by_ids(self, idlist):
-        #Forcément cassé du coup
-        return [self.get_id_node_map()[i] for i in idlist]
+        return [self.nodes[i] for i in idlist]
 
     #setters
     def set_input_ids(self, new_idlist):
@@ -167,4 +136,20 @@ class open_digraph: # for open directed graph
 
 
     def new_id(self):
-        return
+        '''pas fait'''
+        return None
+
+
+
+''' Explications:
+Exemple de différence entre __str__ et __repr__
+    str :
+        26/01/2021
+    repr :
+        datetime.datetime(26, 01, 2021)
+
+fruits = {4:'banane', 'pomme':'pomme rouge', 'nb':80}
+fruits['pomme'] va renvoyer 'pomme rouge'
+fruits['fraise'] = "j'adore les fraise" ajoute une valeur
+for key, value in fruits.items() :
+    print(value) parcourt la liste'''

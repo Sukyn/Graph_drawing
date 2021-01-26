@@ -6,4 +6,4 @@ if __name__ == '__main__':
     g = open_digraph([1], [2], n0list)
     print(g)
     print(dir(open_digraph))
-    print(inspect.getsourcefile(open_digraph))
+    print(inspect.getsourcefile(open_digraph)) #pas testé

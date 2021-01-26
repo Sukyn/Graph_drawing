@@ -101,15 +101,15 @@ class GraphTest(unittest.TestCase):
         g = open_digraph([1], [2], n0list)
         self.assertEqual(g.get_input_ids(), [1])
         self.assertEqual(g.get_output_ids(), [2])
-        #self.assertEqual(g.get_nodes(), n0list)
-        #self.assertEqual(g.get_node_ids(), [0, 1, 2, 3, 4])
-        #self.assertEqual(g.get_id_node_map(), {0:n0list[0],
-        #                                             1:n0list[1],
-        #                                             2:n0list[2],
-        #                                             3:n0list[3],
-        #                                             4:n0list[4]})
-        #self.assertEqual(g.get_node_by_id(3), n0list[3])
-        #self.assertEqual(g.get_nodes_by_ids([3, 4]), [n0list[3], n0list[4]])
+        self.assertEqual(g.get_nodes(), n0list)
+        self.assertEqual(g.get_node_ids(), [0, 1, 2, 3, 4])
+        self.assertEqual(g.get_id_node_map(), {0:n0list[0],
+                                               1:n0list[1],
+                                               2:n0list[2],
+                                               3:n0list[3],
+                                               4:n0list[4]})
+        self.assertEqual(g.get_node_by_id(3), n0list[3])
+        self.assertEqual(g.get_nodes_by_ids([3, 4]), [n0list[3], n0list[4]])
 
     # Tests des setters
     def test_setters(self):
