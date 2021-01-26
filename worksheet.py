@@ -7,3 +7,4 @@ if __name__ == '__main__':
     print(g)
     print(dir(open_digraph))
     print(inspect.getsourcefile(open_digraph)) #pas testé
+    #test
