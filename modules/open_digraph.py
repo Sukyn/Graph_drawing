@@ -12,6 +12,13 @@ class node:
         self.parents = parents
         self.children = children
 
+    '''
+    **Example**
+    id : 0
+    label : d
+    parents : [2, 3, 4]
+    children : [5, 6]
+    '''
     def __str__(self):
         s = "id: {} \nlabel: {}".format(self.id, self.label)
         s += "\nparents: "
@@ -20,6 +27,10 @@ class node:
         s += '{}'.format(self.children, sep=' ')
         return s
 
+    '''
+    **Example**
+    node(0, d, [2, 3, 4], [5, 6])
+    '''
     def __repr__(self):
         s = 'node({}, {}, '.format(self.id, self.label)
         s += '{}'.format(self.parents, sep=',')
@@ -28,10 +39,17 @@ class node:
         s += ')'
         return s
 
+    '''
+    function that returns a copy of the object
+    '''
     def copy(self):
         return node(self.id, self.label, self.parents, self.children)
 
-    #getters
+    '''
+    GETTERS
+    functions to get the attributes of the object
+    (encapsulation)
+    '''
     def get_id(self):
         return self.id
     def get_label(self):
@@ -41,22 +59,21 @@ class node:
     def get_children_ids(self):
         return [i for i in self.children]
 
-    #setters
+    '''
+    SETTERS
+    functions to modify the attributes of the object
+    (encapsulation)
+    '''
     def set_id(self, new_id):
         self.id = new_id
-
     def set_label(self, new_label):
         self.label = new_label
-
     def set_parent_ids(self, new_ids):
         self.parents = new_ids
-
     def set_children_ids(self, new_ids):
         self.children = new_ids
-
     def add_child_id(self, new_id):
         self.children.append(new_id)
-
     def add_parent_id(self, new_id):
         self.parents.append(new_id)
 
@@ -72,6 +89,12 @@ class open_digraph: # for open directed graph
         self.outputs = outputs
         self.nodes = {node.id:node for node in nodes} # self.nodes: <int,node> dict
 
+    '''
+    **EXAMPLE**
+    inputs : [0, 1]
+    outputs : [2]
+    nodes : 4
+    '''
     def __str__(self):
         s = "inputs: "
         s += '{}'.format(self.inputs, sep=',')
@@ -82,6 +105,10 @@ class open_digraph: # for open directed graph
             s += "{}, ".format(i) #Virgule
         return s
 
+    '''
+    **EXAMPLE**
+    open_digraph([0,1], [2], [node(4, 'i', [0, 2], [3])])
+    '''
     def __repr__(self):
         s = "open_digraph("
         s += '{}'.format(self.inputs, sep=',')
@@ -93,48 +120,52 @@ class open_digraph: # for open directed graph
         s += '] )'
         return s
 
+    '''
+    constructor of an empty graph
+    no inputs, no outputs, no nodes
+    '''
     def empty():
         return open_digraph([],[],[])
 
+    '''
+    function that returns a copy of the object
+    '''
     def copy(self):
         return open_digraph(self.inputs, self.outputs, self.nodes.values())
 
-    #getters
+    '''
+    GETTERS
+    functions to get the attributes of the object
+    (encapsulation)
+    '''
     def get_input_ids(self):
         return self.inputs
-
     def get_output_ids(self):
         return self.outputs
-
     def get_id_node_map(self):
         return self.nodes
-
     def get_nodes(self):
         return self.nodes.values()
-
     def get_node_ids(self):
         return [i for i in self.nodes]
-
     def get_node_by_id(self, id):
         return self.nodes[id]
-
     def get_nodes_by_ids(self, idlist):
         return [self.nodes[i] for i in idlist]
 
-    #setters
+    '''
+    SETTERS
+    functions to modify the attributes of the object
+    (encapsulation)
+    '''
     def set_input_ids(self, new_idlist):
         self.inputs = new_idlist
-
     def set_output_ids(self, new_idlist):
         self.outputs = new_idlist
-
     def add_input_id(self, new_id):
         self.inputs.append(new_id)
-
     def add_output_id(self, new_id):
         self.outputs.append(new_id)
-
-
     def new_id(self):
         '''pas fait'''
         return None
