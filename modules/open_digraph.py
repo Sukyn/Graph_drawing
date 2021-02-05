@@ -23,24 +23,15 @@ class node:
     children : [5, 6]
     '''
     def __str__(self):
-        s = "id: {} \nlabel: {}".format(self.id, self.label)
-        s += "\nparents: "
-        s += '{}'.format(self.parents, sep=' ')
-        s += "\nchildren: "
-        s += '{}'.format(self.children, sep=' ')
-        return s
+        return ("("+str(self.id)+", "+self.label+", "
+              +str(self.parents)+", "+str(self.children)+")")
 
     '''
     **Example**
     node(0, d, [2, 3, 4], [5, 6])
     '''
     def __repr__(self):
-        s = 'node({}, {}, '.format(self.id, self.label)
-        s += '{}'.format(self.parents, sep=',')
-        s += ', '
-        s += '{}'.format(self.children, sep=',')
-        s += ')'
-        return s
+        return "node"+str(self)
 
     '''
     function that returns a copy of the object
@@ -86,20 +77,19 @@ class node:
             self.parents.remove(id)
         except ValueError:
             pass
-
     def remove_child_id(self, id):
         try:
             self.children.remove(id)
         except ValueError:
             pass
-
     def remove_parent_id_all(self, id):
         remove_all(self.parents, id)
-
     def remove_child_id_all(self, id):
         remove_all(self.children, id)
 
-
+    def is_well_formed(self):
+        # TO DO
+        # utiliser count_occurence(l, x) dans utils
 
 
 
@@ -130,34 +120,17 @@ class open_digraph: # for open directed graph
 
     '''
     **EXAMPLE**
-    inputs : [0, 1]
-    outputs : [2]
-    nodes : 4
+        ([0, 1], [2], 4)
     '''
-    def __str__(self):
-        s = "inputs: "
-        s += '{}'.format(self.inputs, sep=',')
-        s += "\noutputs: "
-        s += '{}'.format(self.outputs, sep=',')
-        s += "\nnodes: "
-        for i in self.nodes:
-            s += "{}, ".format(i) #Virgule
-        return s
+    return ("("+str(self.inputs)+", "+str(self.nodes)
+                +", "+str(self.outputs)+")")
 
     '''
     **EXAMPLE**
     open_digraph([0,1], [2], [node(4, 'i', [0, 2], [3])])
     '''
     def __repr__(self):
-        s = "open_digraph("
-        s += '{}'.format(self.inputs, sep=',')
-        s += ', '
-        s += '{}'.format(self.outputs, sep=',')
-        s += ', ['
-        for i in self.nodes.values():
-            s += "{}, ".format(repr(i))
-        s += '] )'
-        return s
+        return "open_digraph"+str(self)
 
     '''
     constructor of an empty graph
