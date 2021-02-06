@@ -130,5 +130,23 @@ class GraphTest(unittest.TestCase):
         id = g.new_id()
         self.assertEqual(g.new_id(), 5)
 
+    def well_formed_test(self):
+        n0list = [node(i, '{}'.format(i), [], []) for i in range(5)]
+        g = open_digraph([1], [2], n0list)
+        self.assertEqual(g.is_well_formed(), True)
+
+        good_list = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1]), node(3, '3', [1], [1])]
+        g_good = open_digraph([1], [2], good_list)
+        self.assertEqual(g.is_well_formed(), True)
+
+        wrong_list = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1, 2]), node(3, '3', [1], [1])]
+        g_good = open_digraph([1], [2], good_list)
+        self.assertEqual(g.is_well_formed(), False)
+
+        wrong_list2 = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1]), node(3, '3', [1], [1])]
+        g_good = open_digraph([1], [2, 4], good_list)
+        self.assertEqual(g.is_well_formed(), False)
+
+
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run

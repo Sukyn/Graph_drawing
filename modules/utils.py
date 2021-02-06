@@ -6,4 +6,4 @@ def remove_all(l, x):
         pass
 
 def count_occurence(l, x):
-    # TO DO
+    return l.count(x)

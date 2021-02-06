@@ -1,5 +1,4 @@
-from utils import * #remove_all()
-import utils #utils.remove_all()
+from modules.utils import *
 
 class node:
 
@@ -87,14 +86,6 @@ class node:
     def remove_child_id_all(self, id):
         remove_all(self.children, id)
 
-    def is_well_formed(self):
-        # TO DO
-        # utiliser count_occurence(l, x) dans utils
-
-
-
-
-
 
 
 
@@ -122,8 +113,9 @@ class open_digraph: # for open directed graph
     **EXAMPLE**
         ([0, 1], [2], 4)
     '''
-    return ("("+str(self.inputs)+", "+str(self.nodes)
-                +", "+str(self.outputs)+")")
+    def __str__(self):
+        return ("("+str(self.inputs)+", "+str(self.nodes)
+                    +", "+str(self.outputs)+")")
 
     '''
     **EXAMPLE**
@@ -232,6 +224,28 @@ class open_digraph: # for open directed graph
                 del self.nodes[id]
         except KeyError:
             pass
+
+
+    def is_well_formed(self):
+        for node_id in self.nodes:
+            if self.nodes[node_id].id != node_id:
+                return False
+
+        for inp in self.inputs:
+            if inp not in self.nodes:
+                return False
+        for outp in self.outputs:
+            if outp not in self.nodes:
+                return False
+
+        for node in self.nodes:
+            for child in node.children:
+                n = count_occurence(node.children, child)
+                if (count_occurence(self.nodes[child].parents, node.id) != n):
+                    return False
+
+        return True
+        # utiliser count_occurence(l, x) dans utils
 
 
 ''' Explications:
