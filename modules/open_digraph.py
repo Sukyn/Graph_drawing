@@ -48,9 +48,9 @@ class node:
     def get_label(self):
         return self.label
     def get_parent_ids(self):
-        return [i for i in self.parents]
+        return self.parents
     def get_children_ids(self):
-        return [i for i in self.children]
+        return self.children
 
     '''
     SETTERS
@@ -70,7 +70,9 @@ class node:
     def add_parent_id(self, new_id):
         self.parents.append(new_id)
 
-
+    '''
+    functions to manage parents and children
+    '''
     def remove_parent_id(self, id):
         try:
             self.parents.remove(id)
@@ -183,11 +185,12 @@ class open_digraph: # for open directed graph
             id += 1
         return id
 
-
+    '''
+    functions to add remove_edges
+    '''
     def add_edge(self, src, tgt):
         self.get_node_by_id(src).children.append(tgt)
         self.get_node_by_id(tgt).parents.append(src)
-
     def add_node(self, label = '', parents = [], children = []):
         id = self.new_id()
         node = node(id, label, parents, children)
@@ -198,26 +201,26 @@ class open_digraph: # for open directed graph
             self.add_edge(id, child)
         return id
 
+    '''
+    functions to remove edges
+    '''
     def remove_edge(self, src, tgt):
         try:
             self.get_node_by_id(src).children.remove(tgt)
             self.get_node_by_id(tgt).parents.remove(src)
         except ValueError:
             print("The edge doesn't exist")
-
     def remove_node_by_id(self, id):
         try:
             del self.nodes[id]
         except KeyError:
             print("The node doesn't exist")
-
     def remove_edges(self, src, tgt):
         try:
             while(True):
                 remove_edge(src,tgt)
         except ValueError:
             pass
-
     def remove_nodes_by_id(self, id):
         try:
             while(True):
@@ -225,38 +228,26 @@ class open_digraph: # for open directed graph
         except KeyError:
             pass
 
-
+    '''
+    functions that verify if the graph is well formed
+    '''
     def is_well_formed(self):
-        for node_id in self.nodes:
-            if self.nodes[node_id].id != node_id:
+
+        nodes_ids = self.get_id_node_map() # Getting every id of nodes in the graph
+        for node_id in nodes_ids:
+            if nodes_ids[node_id].get_id() != node_id: # Checking that keys and nodes are linked
                 return False
 
-        for inp in self.inputs:
-            if inp not in self.nodes:
-                return False
-        for outp in self.outputs:
-            if outp not in self.nodes:
-                return False
-
-        for node in self.nodes:
-            for child in node.children:
-                n = count_occurence(node.children, child)
-                if (count_occurence(self.nodes[child].parents, node.id) != n):
+            sons = node_id.get_children_ids()
+            for child in sons: # Checking that parents and sons are coherent
+                n = count_occurence(sons, child)
+                if (count_occurence(nodes_ids[child].get_parent_ids(), node_id.get_id()) != n):
                     return False
 
+        for inp in self.get_input_ids(): # Checking inputs are in nodes
+            if inp not in nodes_ids:
+                return False
+        for outp in self.get_output_ids(): # Checking outputs are in nodes
+            if outp not in nodes_ids:
+                return False
         return True
-        # utiliser count_occurence(l, x) dans utils
-
-
-''' Explications:
-Exemple de différence entre __str__ et __repr__
-    str :
-        26/01/2021
-    repr :
-        datetime.datetime(26, 01, 2021)
-
-fruits = {4:'banane', 'pomme':'pomme rouge', 'nb':80}
-fruits['pomme'] va renvoyer 'pomme rouge'
-fruits['fraise'] = "j'adore les fraise" ajoute une valeur
-for key, value in fruits.items() :
-    print(value) parcourt la liste'''
