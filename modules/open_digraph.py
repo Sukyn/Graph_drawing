@@ -188,7 +188,7 @@ class open_digraph: # for open directed graph
         return id
 
     '''
-    functions to add remove_edges
+    functions to add edges
     '''
     def add_edge(self, src, tgt):
         self.get_node_by_id(src).children.append(tgt)
@@ -212,28 +212,26 @@ class open_digraph: # for open directed graph
     functions to remove edges
     '''
     def remove_edge(self, src, tgt):
-        try:
-            self.get_node_by_id(src).children.remove(tgt)
-            self.get_node_by_id(tgt).parents.remove(src)
-        except ValueError:
-            print("The edge doesn't exist")
+        self.get_node_by_id(src).children.remove(tgt)
+        self.get_node_by_id(tgt).parents.remove(src)
+
     def remove_node_by_id(self, id):
-        try:
-            del self.nodes[id]
-        except KeyError:
-            print("The node doesn't exist")
-    def remove_edges(self, src, tgt):
-        try:
-            while(True):
-                remove_edge(src,tgt)
-        except ValueError:
-            pass
-    def remove_nodes_by_id(self, id):
-        try:
-            while(True):
-                del self.nodes[id]
-        except KeyError:
-            pass
+        del self.nodes[id]
+
+
+    def remove_edges(self, src_list, tgt_list):
+        for src, tgt in zip(src_list, tgt_list):
+            try:
+                while(True):
+                    self.remove_edge(src,tgt)
+            except ValueError:
+                pass
+    def remove_nodes_by_id(self, id_list):
+        for id in id_list:
+            try:
+                self.remove_node_by_id(id)
+            except KeyError:
+                pass
 
     '''
     functions that verify if the graph is well formed
@@ -245,10 +243,10 @@ class open_digraph: # for open directed graph
             if nodes_ids[node_id].get_id() != node_id: # Checking that keys and nodes are linked
                 return False
 
-            sons = node_id.get_children_ids()
+            sons = nodes_ids[node_id].get_children_ids()
             for child in sons: # Checking that parents and sons are coherent
                 n = count_occurence(sons, child)
-                if (count_occurence(nodes_ids[child].get_parent_ids(), node_id.get_id()) != n):
+                if (count_occurence(nodes_ids[child].get_parent_ids(), nodes_ids[node_id].get_id()) != n):
                     return False
 
         for inp in self.get_input_ids(): # Checking inputs are in nodes
