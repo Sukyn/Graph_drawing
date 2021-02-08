@@ -200,8 +200,8 @@ class open_digraph: # for open directed graph
 
     def add_node(self, label = '', parents = [], children = []):
         id = self.new_id()
-        node = node(id, label, parents, children)
-        self.nodes[node.id] = node
+        thisnode = node(id, label, parents, children)
+        self.nodes[thisnode.id] = thisnode
         for parent in parents:
             self.add_edge(parent, id)
         for child in children:
@@ -222,7 +222,7 @@ class open_digraph: # for open directed graph
     def remove_edges(self, src_list, tgt_list):
         for src, tgt in zip(src_list, tgt_list):
             try:
-                while(True):
+                while(True): #si jamais on a des arrêtes multiples
                     self.remove_edge(src,tgt)
             except ValueError:
                 pass

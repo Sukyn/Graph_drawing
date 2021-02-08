@@ -70,6 +70,25 @@ class NodeTest(unittest.TestCase):
         n0.add_child_id(8)
         self.assertEqual(n0.get_children_ids(), [8])
 
+    def test_remove(self):
+        n0 = node(0, 'i', [], [1])
+
+        n0.add_parent_id(7)
+        n0.remove_parent_id(7)
+        self.assertEqual(n0.get_parent_ids(), [])
+
+        n0.set_children_ids([7,8])
+        n0.remove_child_id(7)
+        self.assertEqual(n0.get_children_ids(), [8])
+
+        n0.set_parent_ids([2, 2])
+        n0.remove_parent_id_all(2)
+        self.assertEqual(n0.get_parent_ids(), [])
+
+        n0.set_children_ids([3,3,4])
+        n0.remove_child_id_all(3)
+        self.assertEqual(n0.get_children_ids(), [4])
+
 class GraphTest(unittest.TestCase):
     def test_repr(self):
         n0list = [node(i, '{}'.format(i), [], [1]) for i in range(5)]
@@ -149,9 +168,12 @@ class GraphTest(unittest.TestCase):
         g.remove_edges([2, 3], [1, 4])
         self.assertEqual(g.get_node_by_id(1).get_parent_ids(), [])
 
+        g.add_node()
+        self.assertEqual(g.get_node_ids(), [0, 1, 2, 3, 4, 5])
+
         g.remove_node_by_id(4)
-        self.assertEqual(g.get_node_ids(), [0, 1, 2, 3])
-        g.remove_nodes_by_id([2,3,4])
+        self.assertEqual(g.get_node_ids(), [0, 1, 2, 3, 5])
+        g.remove_nodes_by_id([2,3,4, 5])
         self.assertEqual(g.get_node_ids(), [0, 1])
 
     def test_well_formed(self):
