@@ -20,6 +20,7 @@ class node:
     label : d
     parents : [2, 3, 4]
     children : [5, 6]
+    => (0, d, [2, 3, 4], [5, 6])
     '''
     def __str__(self):
         return ("("+str(self.id)+", "+self.label+", "
@@ -27,7 +28,11 @@ class node:
 
     '''
     **Example**
-    node(0, d, [2, 3, 4], [5, 6])
+    id : 0
+    label : d
+    parents : [2, 3, 4]
+    children : [5, 6]
+    => node(0, d, [2, 3, 4], [5, 6])
     '''
     def __repr__(self):
         return "node"+str(self)
@@ -151,7 +156,7 @@ class open_digraph: # for open directed graph
     def get_id_node_map(self):
         return self.nodes
     def get_nodes(self):
-        return self.nodes.values()
+        return list(self.nodes.values())
     def get_node_ids(self):
         return [i for i in self.nodes]
     def get_node_by_id(self, id):
@@ -172,14 +177,11 @@ class open_digraph: # for open directed graph
         self.inputs.append(new_id)
     def add_output_id(self, new_id):
         self.outputs.append(new_id)
-    def new_id(self):
-        '''pas fait'''
-        return None
 
-    '''
-    function that returns an used id for an edge
-    '''
     def new_id(self):
+        '''
+        function that returns an used id for an edge
+        '''
         id = 0
         while(self.ids.count(id) > 0):
             id += 1
@@ -191,6 +193,11 @@ class open_digraph: # for open directed graph
     def add_edge(self, src, tgt):
         self.get_node_by_id(src).children.append(tgt)
         self.get_node_by_id(tgt).parents.append(src)
+
+    def add_edges(self, src_list, tgt_list):
+        for src,tgt in zip(src_list,tgt_list):
+            self.add_edge(src, tgt)
+
     def add_node(self, label = '', parents = [], children = []):
         id = self.new_id()
         node = node(id, label, parents, children)
