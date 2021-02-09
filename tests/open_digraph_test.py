@@ -193,6 +193,11 @@ class GraphTest(unittest.TestCase):
         g_wrong2 = open_digraph([1], [2, 4], wrong_list2)
         self.assertEqual(g_wrong2.is_well_formed(), False)
 
-
+    def test_normalize(self):
+        good_list = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1]), node(3, '3', [1], [1])]
+        g_good = open_digraph([1], [2], good_list)
+        matrix = g_good.adjacency_matrix()
+        for lin in matrix:
+            print(lin)
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run

@@ -163,7 +163,8 @@ class open_digraph: # for open directed graph
         return self.nodes[id]
     def get_nodes_by_ids(self, idlist):
         return [self.nodes[i] for i in idlist]
-
+    def get_length(self):
+        return len(self.ids)
     '''
     SETTERS
     functions to modify the attributes of the object
@@ -256,3 +257,36 @@ class open_digraph: # for open directed graph
             if outp not in nodes_ids:
                 return False
         return True
+
+    def change_id(self, new_id, node_id):
+        if(new_id in self.get_node_ids()):
+            print("The node id already exists")
+            #raise
+        elif(node_id == new_id):
+            pass
+        else:
+            self.get_id_node_map()[new_id] = self.get_id_node_map().pop(node_id)
+            for node in self.get_nodes():
+                if node_id in node.get_parent_ids():
+                    node.remove_parent_id(node_id)
+                    node.add_parent_id(new_id)
+                if node_id in node.get_children_ids():
+                    node.remove_child_id(node_id)
+                    node.add_child_id(new_id)
+
+
+    def change_ids(self, new_ids, node_ids):
+        list = sorted(zip(new_ids, node_ids), key = lambda x: x[0])
+        print(list)
+        for new_id, node_id in list:
+            self.change_id(new_id, node_id)
+
+    def normalize_ids(self):
+        normalized_list = [i for i in range(self.get_length())]
+        old_ids = self.get_node_ids()
+        self.change_ids(normalized_list, old_ids)
+
+    def adjacency_matrix(self):
+        n = self.get_length()
+        self.normalize_ids()
+        return [[count_occurence(self.get_node_by_id(i).get_parent_ids(), j) for i in range(n)] for j in range(n)]

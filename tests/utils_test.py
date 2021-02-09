@@ -23,5 +23,15 @@ class FunctionTest(unittest.TestCase):
         assertEqual(count_occurence(list3, 1), 3)
 
 
+    def test_random_list(self):
+        list1 = random_int_list(20, 3)
+        #print(list1)
+        matrix1 = random_matrix(3, 2, oriented=True)
+        for line in matrix1:
+            print(line)
+
+        g = graph_from_adjacency_matrix(matrix1)
+        print(g)
+
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run
