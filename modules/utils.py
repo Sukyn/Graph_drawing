@@ -63,7 +63,7 @@ def random_graph(n, bound, inputs=0, outputs=0, form="free"):
     '''
     if (form == "free"):
         graphe = graph_from_adjacency_matrix( random_matrix(n, bound) )
-    if (form == "DAG"):
+    elif (form == "DAG"):
         graphe = graph_from_adjacency_matrix( random_matrix(n, bound, triangular = True) )
     elif (form == "oriented"):
         graphe = graph_from_adjacency_matrix( random_matrix(n, bound, oriented = True) )
@@ -73,7 +73,8 @@ def random_graph(n, bound, inputs=0, outputs=0, form="free"):
         graphe = graph_from_adjacency_matrix( random_matrix(n, bound, null_diag = True) )
     else:
         print("Invalid parameters")
-        
+        return
+
     graphe.set_input_ids(inputs)
     graphe.set_output_ids(outputs)
     return graphe
