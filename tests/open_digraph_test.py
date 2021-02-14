@@ -70,6 +70,25 @@ class NodeTest(unittest.TestCase):
         n0.add_child_id(8)
         self.assertEqual(n0.get_children_ids(), [8])
 
+    def test_remove(self):
+        n0 = node(0, 'i', [], [1])
+
+        n0.add_parent_id(7)
+        n0.remove_parent_id(7)
+        self.assertEqual(n0.get_parent_ids(), [])
+
+        n0.set_children_ids([7,8])
+        n0.remove_child_id(7)
+        self.assertEqual(n0.get_children_ids(), [8])
+
+        n0.set_parent_ids([2, 2])
+        n0.remove_parent_id_all(2)
+        self.assertEqual(n0.get_parent_ids(), [])
+
+        n0.set_children_ids([3,3,4])
+        n0.remove_child_id_all(3)
+        self.assertEqual(n0.get_children_ids(), [4])
+
 class GraphTest(unittest.TestCase):
     def test_repr(self):
         n0list = [node(i, '{}'.format(i), [], [1]) for i in range(5)]
@@ -124,5 +143,61 @@ class GraphTest(unittest.TestCase):
         g.add_output_id(2)
         self.assertEqual(g.get_output_ids(), [2])
 
+    def test_new_id(self):
+        n0list = [node(i, '{}'.format(i), [], [1]) for i in range(5)]
+        g = open_digraph([1], [2], n0list)
+        id = g.new_id()
+        self.assertEqual(g.new_id(), 5)
+
+    def test_edges_management(self):
+        n0list = [node(i, '{}'.format(i), [], []) for i in range(5)]
+        g = open_digraph([1], [2], n0list)
+
+        g.add_edge(2, 3)
+        self.assertEqual(g.get_node_by_id(3).get_parent_ids(), [2])
+        self.assertEqual(g.get_node_by_id(2).get_children_ids(), [3])
+        g.remove_edge(2, 3)
+        self.assertEqual(g.get_node_by_id(3).get_parent_ids(), [])
+        self.assertEqual(g.get_node_by_id(2).get_children_ids(), [])
+
+        g.add_edges([2, 3], [1, 4])
+        self.assertEqual(g.get_node_by_id(1).get_parent_ids(), [2])
+        self.assertEqual(g.get_node_by_id(3).get_children_ids(), [4])
+
+        g.add_edge(2, 1)
+        g.remove_edges([2, 3], [1, 4])
+        self.assertEqual(g.get_node_by_id(1).get_parent_ids(), [])
+
+        g.add_node()
+        self.assertEqual(g.get_node_ids(), [0, 1, 2, 3, 4, 5])
+
+        g.remove_node_by_id(4)
+        self.assertEqual(g.get_node_ids(), [0, 1, 2, 3, 5])
+        g.remove_nodes_by_id([2,3,4, 5])
+        self.assertEqual(g.get_node_ids(), [0, 1])
+
+    def test_well_formed(self):
+        n0list = [node(i, '{}'.format(i), [], []) for i in range(5)]
+        g = open_digraph([1], [2], n0list)
+        self.assertEqual(g.is_well_formed(), True)
+
+        good_list = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1]), node(3, '3', [1], [1])]
+        g_good = open_digraph([1], [2], good_list)
+        self.assertEqual(g_good.is_well_formed(), True)
+
+        wrong_list = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1, 2]), node(3, '3', [1], [1])]
+        g_wrong = open_digraph([1], [2], wrong_list)
+        self.assertEqual(g_wrong.is_well_formed(), False)
+
+        wrong_list2 = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1]), node(3, '3', [1], [1])]
+        g_wrong2 = open_digraph([1], [2, 4], wrong_list2)
+        self.assertEqual(g_wrong2.is_well_formed(), False)
+
+    def test_normalize(self):
+        good_list = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1]), node(3, '3', [1], [1])]
+        g_good = open_digraph([1], [2], good_list)
+        matrix = g_good.adjacency_matrix()
+        for lin in matrix:
+            print(lin)
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run
