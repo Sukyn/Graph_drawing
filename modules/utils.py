@@ -1,5 +1,5 @@
 import random
-import modules.open_digraph as odgraph
+import open_digraph as odgraph
 
 def remove_all(l, x):
     try:

@@ -1,4 +1,4 @@
-from modules.utils import *
+from utils import *
 
 class node:
 
