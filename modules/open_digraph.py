@@ -1,46 +1,52 @@
-from utils import *
+import sys
+sys.path.append('../')
+from modules.utils import *
 
 class node:
 
-    '''
-    identity: int; its unique id in the graph
-    label: string;
-    parents: int list; a sorted list containing the ids of its parents
-    children: int list; a sorted list containing the ids of its children
-    '''
     def __init__(self, identity, label, parents, children):
+        '''
+        **TYPE** void
+        identity: int; its unique id in the graph
+        label: string;
+        parents: int list; a sorted list containing the ids of its parents
+        children: int list; a sorted list containing the ids of its children
+        '''
         self.id = identity
         self.label = label
         self.parents = parents
         self.children = children
 
-    '''
-    **Example**
-    id : 0
-    label : d
-    parents : [2, 3, 4]
-    children : [5, 6]
-    => (0, d, [2, 3, 4], [5, 6])
-    '''
     def __str__(self):
+        '''
+        **TYPE** string
+        '''
+        ######  Example  ######
+        # id : 0
+        # label : d
+        # parents : [2, 3, 4]
+        # children : [5, 6]
+        # will return (0, d, [2, 3, 4], [5, 6])
         return ("("+str(self.id)+", "+self.label+", "
               +str(self.parents)+", "+str(self.children)+")")
 
-    '''
-    **Example**
-    id : 0
-    label : d
-    parents : [2, 3, 4]
-    children : [5, 6]
-    => node(0, d, [2, 3, 4], [5, 6])
-    '''
     def __repr__(self):
+        '''
+        **TYPE** string
+        '''
+        ######  Example  ######
+        # id : 0
+        # label : d
+        # parents : [2, 3, 4]
+        # children : [5, 6]
+        # will return  node(0, d, [2, 3, 4], [5, 6])
         return "node"+str(self)
 
-    '''
-    function that returns a copy of the object
-    '''
     def copy(self):
+        '''
+        **TYPE** node
+        function that returns a copy of the object
+        '''
         return node(self.id, self.label, self.parents, self.children)
 
     '''
@@ -75,40 +81,55 @@ class node:
     def add_parent_id(self, new_id):
         self.parents.append(new_id)
 
-    '''
-    functions to manage parents and children
-    '''
+
     def remove_parent_id(self, id):
+        '''
+        **TYPE** void
+        id: int; id of the parent
+        remove the parent using its id
+        '''
         try:
             self.parents.remove(id)
         except ValueError:
             pass
+
     def remove_child_id(self, id):
+        '''
+        **TYPE** void
+        id: int; id of the child
+        remove the child using its id
+        '''
         try:
             self.children.remove(id)
         except ValueError:
             pass
+
     def remove_parent_id_all(self, id):
+        '''
+        **TYPE** void
+        id: int; id of the parents
+        remove all of the parents with the id
+        '''
         remove_all(self.parents, id)
+
     def remove_child_id_all(self, id):
+        '''
+        **TYPE** void
+        id: int; id of the children
+        remove all of the children with the id
+        '''
         remove_all(self.children, id)
-
-
-
-
-
 
 
 
 class open_digraph: # for open directed graph
 
-
-    '''
-    inputs: int list; the ids of the input nodes
-    outputs: int list; the ids of the output nodes
-    nodes: node list;
-    '''
     def __init__(self, inputs, outputs, nodes):
+        '''
+        inputs: int list; the ids of the input nodes
+        outputs: int list; the ids of the output nodes
+        nodes: node list;
+        '''
         self.inputs = inputs
         self.outputs = outputs
         self.nodes = {node.id:node for node in nodes} # self.nodes: <int,node> dict
@@ -116,32 +137,34 @@ class open_digraph: # for open directed graph
 
 
 
-    '''
-    **EXAMPLE**
-        ([0, 1], [2], 4)
-    '''
+
     def __str__(self):
+        '''
+        '''
+        # **EXAMPLE** ([0, 1], [2], 4)
         return ("("+str(self.inputs)+", "+str(self.nodes)
                     +", "+str(self.outputs)+")")
 
-    '''
-    **EXAMPLE**
-    open_digraph([0,1], [2], [node(4, 'i', [0, 2], [3])])
-    '''
     def __repr__(self):
+        '''
+        **EXAMPLE**
+        open_digraph([0,1], [2], [node(4, 'i', [0, 2], [3])])
+        '''
         return "open_digraph"+str(self)
 
-    '''
-    constructor of an empty graph
-    no inputs, no outputs, no nodes
-    '''
     def empty():
+        '''
+        **TYPE** void
+        constructor of an empty graph
+        no inputs, no outputs, no nodes
+        '''
         return open_digraph([],[],[])
 
-    '''
-    function that returns a copy of the object
-    '''
     def copy(self):
+        '''
+        **TYPE** open_digraph
+        function that returns a copy of the object
+        '''
         return open_digraph(self.inputs, self.outputs, self.nodes.values())
 
     '''
@@ -181,27 +204,43 @@ class open_digraph: # for open directed graph
 
     def new_id(self):
         '''
-        function that returns an used id for an edge
+        **TYPE** void
+        function that returns an unused id for an edge
         '''
         id = 0
-        while(self.ids.count(id) > 0):
+        while(self.nodes.get(id, None) != None):
             id += 1
         return id
 
-    '''
-    functions to add edges
-    '''
     def add_edge(self, src, tgt):
+        '''
+        **TYPE** void
+        src: int; id of the source node
+        tgt: int; id of the target node
+        function to add edge
+        '''
         self.get_node_by_id(src).children.append(tgt)
         self.get_node_by_id(tgt).parents.append(src)
 
     def add_edges(self, src_list, tgt_list):
+        '''
+        **TYPE** void
+        src_list: int list; ids of the source nodes
+        tgt_list: int list; ids of the target nodes
+        fonction to add edges
+        '''
         for src,tgt in zip(src_list,tgt_list):
             self.add_edge(src, tgt)
 
     def add_node(self, label = '', parents = [], children = []):
+        '''
+        **TYPE** void
+        label: string; label of the node to add
+        parents: int list; parents' ids of the node to add
+        children: int list; children's ids of the node to add
+        '''
         id = self.new_id()
-        thisnode = node(id, label, parents, children)
+        thisnode = node(id, label, [], [])
         self.nodes[thisnode.id] = thisnode
         for parent in parents:
             self.add_edge(parent, id)
@@ -209,18 +248,36 @@ class open_digraph: # for open directed graph
             self.add_edge(id, child)
         return id
 
-    '''
-    functions to remove edges
-    '''
     def remove_edge(self, src, tgt):
+        '''
+        **TYPE** void
+        src: int; id of the source node
+        tgt : int; id of the target node
+        function to remove edge
+        '''
         self.get_node_by_id(src).children.remove(tgt)
         self.get_node_by_id(tgt).parents.remove(src)
 
     def remove_node_by_id(self, id):
+        '''
+        **TYPE** void
+        id: int; id of the node to remove
+        remove the node with the id
+        '''
+        for parent in self.get_node_by_id(id).parents :
+            parent.remove_child_id_all(id)
+        for child in self.get_node_by_id(id).children :
+            child.remove_parent_id_all(id)
         del self.nodes[id]
 
 
     def remove_edges(self, src_list, tgt_list):
+        '''
+        **TYPE** void
+        src_list: int list; ids of the source nodes
+        tgt_list: int list; ids of the target nodes
+        fonction to remove edges
+        '''
         for src, tgt in zip(src_list, tgt_list):
             try:
                 while(True): #si jamais on a des arrêtes multiples
@@ -228,26 +285,38 @@ class open_digraph: # for open directed graph
             except ValueError:
                 pass
     def remove_nodes_by_id(self, id_list):
+        '''
+        **TYPE** void
+        id_list: int list; list of the nodes' ids
+        remove the nodes with the ids
+        '''
         for id in id_list:
             try:
                 self.remove_node_by_id(id)
             except KeyError:
                 pass
 
-    '''
-    functions that verify if the graph is well formed
-    '''
-    def is_well_formed(self):
 
+    def is_well_formed(self):
+        '''
+        **TYPE** boolean
+        function that verify if the graph is well formed
+        return True if the graph is well formed
+        '''
         nodes_ids = self.get_id_node_map() # Getting every id of nodes in the graph
         for node_id in nodes_ids:
             if nodes_ids[node_id].get_id() != node_id: # Checking that keys and nodes are linked
                 return False
 
             sons = nodes_ids[node_id].get_children_ids()
-            for child in sons: # Checking that parents and sons are coherent
+            parents = nodes_ids[node_id].get_parent_ids()
+            for child in sons: # Checking sons are coherent
                 n = count_occurence(sons, child)
                 if (count_occurence(nodes_ids[child].get_parent_ids(), nodes_ids[node_id].get_id()) != n):
+                    return False
+            for parent in parents: # Checking that parents are coherent
+                n = count_occurence(parents, parent)
+                if (count_occurence(nodes_ids[parent].get_children_ids(), nodes_ids[node_id].get_id()) != n):
                     return False
 
         for inp in self.get_input_ids(): # Checking inputs are in nodes
@@ -259,6 +328,12 @@ class open_digraph: # for open directed graph
         return True
 
     def change_id(self, new_id, node_id):
+        '''
+        **TYPE** void
+        new_id: int; new id of the node
+        node_id: int; actual id of the node
+        change node_id by new_id
+        '''
         if(new_id in self.get_node_ids()):
             print("The node id already exists")
             #raise
@@ -276,17 +351,31 @@ class open_digraph: # for open directed graph
 
 
     def change_ids(self, new_ids, node_ids):
+        '''
+        **TYPE** void
+        new_ids: int list; new ids of the nodes
+        node_ids: int list; actual ids of the nodes
+        change all of the node_ids by new_ids
+        '''
         list = sorted(zip(new_ids, node_ids), key = lambda x: x[0])
         print(list)
         for new_id, node_id in list:
             self.change_id(new_id, node_id)
 
     def normalize_ids(self):
+        '''
+        **TYPE** void
+        change every nodes ids with the first natural numbers
+        '''
         normalized_list = [i for i in range(self.get_length())]
         old_ids = self.get_node_ids()
         self.change_ids(normalized_list, old_ids)
 
     def adjacency_matrix(self):
+        '''
+        **TYPE** int list list
+        return the adjacency_matrix of the graph
+        '''
         n = self.get_length()
         self.normalize_ids()
         return [[count_occurence(self.get_node_by_id(i).get_parent_ids(), j) for i in range(n)] for j in range(n)]
