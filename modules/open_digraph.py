@@ -316,7 +316,7 @@ class open_digraph: # for open directed graph
         '''
         for src, tgt in zip(src_list, tgt_list):
             try:
-                while(True): 
+                while(True):
                     self.remove_edge(src,tgt)
             except ValueError:
                 pass
@@ -445,12 +445,14 @@ class open_digraph: # for open directed graph
             if (g.get_nodes() == []):
                 return False
             else:
-                leaf = -1
+                has_leaf = False
+                leaf = 0
                 for node in g.get_nodes():
                     if (node.get_children_ids() == [] || node.get_parent_ids() == []):
                         leaf = node.get_id()
+                        has_leaf = True
                         break
-                if (leaf == -1):
+                if (!has_leaf):
                     return True
                 else:
                     return sub_is_cyclic(g.remove_node_by_id(leaf))
@@ -478,7 +480,7 @@ class bool_circ(open_digraph):
         '''Si g est une instance d’open_digraph, alors bool_circ(g)
         cree un circuit booleen en utilisant g. On ne se preoccupe pas ici de savoir si le graphe g
         est un circuit booleen valable'''
-        self.g = super().__init__(g.inputs, g.outputs, g.nodes, g.ids)
+        self = super().__init__(g.inputs, g.outputs, g.nodes, g.ids)
         #QUESTION 7
         '''Modifier la methode __init__ de bool_circ pour qu’elle teste si le graphe donne est bien un circuit booleen.'''
         return self.is_well_formed()
@@ -487,7 +489,7 @@ class bool_circ(open_digraph):
         #QUESTION 2
         '''
         Creer une methode de bool_circ qui convertit le circuit en open_digraph.'''
-        return open_digraph(self.inputs, self.outputs, self.nodes, self.ids)
+        return open_digraph(self.input_ids(), self.get_output_ids(), self.get_nodes(), self.get_ids())
 
     def is_well_formed(self):
         #QUESTION 6
@@ -508,10 +510,10 @@ class bool_circ(open_digraph):
                     if (node.indegree() != 1):
                         return False
                 if (node.get_label() == "&"):
-                    if node.outdegree() != 1:
+                    if (node.outdegree() != 1):
                         return False
                 if (node.get_label() == "|" ):
-                    if node.outdegree() != 1:
+                    if (node.outdegree() != 1):
                         return False
                 if (node.get_label() == "~"):
                     if (node.indegree() != 1 or node.outdegree() != 1):
