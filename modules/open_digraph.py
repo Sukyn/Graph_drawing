@@ -120,6 +120,42 @@ class node:
         '''
         remove_all(self.children, id)
 
+    def indegree(self):
+        #QUESTION 3
+        '''calcule le degré entrant'''
+        return len(self.parents())
+
+    def outdegree(self):
+        #QUESTION 3
+        '''calcule le degré sortant'''
+        return len(self.children())
+
+    def degree(self):
+        #QUESTION 3
+        '''Returns the total degree of the node'''
+        return self.outdegree() + self.indregree()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class open_digraph: # for open directed graph
@@ -280,7 +316,7 @@ class open_digraph: # for open directed graph
         '''
         for src, tgt in zip(src_list, tgt_list):
             try:
-                while(True): #si jamais on a des arrêtes multiples
+                while(True): 
                     self.remove_edge(src,tgt)
             except ValueError:
                 pass
@@ -379,3 +415,105 @@ class open_digraph: # for open directed graph
         n = self.get_length()
         self.normalize_ids()
         return [[count_occurence(self.get_node_by_id(i).get_parent_ids(), j) for i in range(n)] for j in range(n)]
+
+
+    def max_indegree(self):
+        #QUESTION 4
+        '''Calcul le degré entrant maximum'''
+        return max([node.indegree() for node in self.get_nodes()])
+
+    def min_indegree(self):
+        #QUESTION 4
+        '''Calcul le degré entrant minimum'''
+        return min([node.indegree() for node in self.get_nodes()])
+
+    def max_outdegree(self):
+        #QUESTION 4
+        '''Calcul le degré sortant maximum'''
+        return max([node.outdegree() for node in self.get_nodes()])
+
+    def min_outdegree(self):
+        #QUESTION 4
+        '''Calcul le degré sortant minimum'''
+        return min([node.outdegree() for node in self.get_nodes()])
+
+    def is_cyclic(self):
+        #QUESTION 5
+        '''Teste la cyclicité du graphe'''
+        g = copy(self)
+        def sub_is_cyclic(g):
+            if (g.get_nodes() == []):
+                return False
+            else:
+                leaf = -1
+                for node in g.get_nodes():
+                    if (node.get_children_ids() == [] || node.get_parent_ids() == []):
+                        leaf = node.get_id()
+                        break
+                if (leaf == -1):
+                    return True
+                else:
+                    return sub_is_cyclic(g.remove_node_by_id(leaf))
+        return sub_is_cyclic(g)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class bool_circ(open_digraph):
+    def __init__(self, g):
+        #QUESTION 1
+        '''Si g est une instance d’open_digraph, alors bool_circ(g)
+        cree un circuit booleen en utilisant g. On ne se preoccupe pas ici de savoir si le graphe g
+        est un circuit booleen valable'''
+        self.g = super().__init__(g.inputs, g.outputs, g.nodes, g.ids)
+        #QUESTION 7
+        '''Modifier la methode __init__ de bool_circ pour qu’elle teste si le graphe donne est bien un circuit booleen.'''
+        return self.is_well_formed()
+
+    def to_graph(self):
+        #QUESTION 2
+        '''
+        Creer une methode de bool_circ qui convertit le circuit en open_digraph.'''
+        return open_digraph(self.inputs, self.outputs, self.nodes, self.ids)
+
+    def is_well_formed(self):
+        #QUESTION 6
+        '''Teste si le circuit booléen est bien formé
+        i.e. acyclique et respecter les contraintes de degré données
+
+        Par la suite, on pourra  ́egalement se permettre d’avoir des noeuds  ́
+        étiquetes ’0’ et ’1’ pour representer les constantes 0 et 1.
+        Pour être  un  circuit  booleen  valide,  tous  les  noeuds  “copie”  doivent
+        avoir exactement  une  entree  (i.e.  doivent  avoir  un  degre  entrant  ́egal  à  1) ;
+        chaque porte ET et OU doit avoir exactement une sortie ;
+        chaque porte NON doit avoir exactement une entree et une sortie.'''
+        if self.to_graph().is_cyclic():
+            return False
+        else:
+            for node in self.to_graph().get_nodes():
+                if (node.get_label() == ""):
+                    if (node.indegree() != 1):
+                        return False
+                if (node.get_label() == "&"):
+                    if node.outdegree() != 1:
+                        return False
+                if (node.get_label() == "|" ):
+                    if node.outdegree() != 1:
+                        return False
+                if (node.get_label() == "~"):
+                    if (node.indegree() != 1 or node.outdegree() != 1):
+                        return False
+            return True
