@@ -113,8 +113,6 @@ centre = point(width/2, height/2)
 n0list = [odgraph.node(i, '{}'.format(i), [], [1]) for i in range(3)]
 g = odgraph.open_digraph([1], [2], n0list)
 g.add_edge(1, 2)
-#draw.graph(g,'random')
-draw.graph(g,'manual',{0:point(50,20),1:point(130,70),2:point(300,250)},[point(2,2)], [point(400,400)])
 pasOrigine = point(61,79)
 #draw.arrows(pasOrigine,centre)
 #draw.drawnode(node, pasOrigine,True)
