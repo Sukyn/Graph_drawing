@@ -440,7 +440,7 @@ class open_digraph: # for open directed graph
     def is_cyclic(self):
         #QUESTION 5
         '''Teste la cyclicité du graphe'''
-        g = copy(self)
+        g = self.copy()
         def sub_is_cyclic(g):
             if (g.get_nodes() == []):
                 return False
@@ -448,11 +448,11 @@ class open_digraph: # for open directed graph
                 has_leaf = False
                 leaf = 0
                 for node in g.get_nodes():
-                    if (node.get_children_ids() == [] || node.get_parent_ids() == []):
+                    if (node.get_children_ids() == [] or node.get_parent_ids() == []):
                         leaf = node.get_id()
                         has_leaf = True
                         break
-                if (!has_leaf):
+                if (not has_leaf):
                     return True
                 else:
                     return sub_is_cyclic(g.remove_node_by_id(leaf))

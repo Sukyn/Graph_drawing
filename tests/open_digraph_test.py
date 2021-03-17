@@ -90,14 +90,28 @@ class NodeTest(unittest.TestCase):
         self.assertEqual(n0.get_children_ids(), [4])
 
     '''TEST TD6'''
+    def exemples_de_node(self):
+        '''
+        on renvoie un couple de node exemples pour faire les tests
+        '''
+        node1 = odgraph.node(0, "Isabelle", [], [1,2,7,3,5,2,2])
+        node2 = odgraph.node(1, "Adjani", [4,4], [7,5,5,8])
+        return (node1,node2)
+
     def test_indegree(self):
-        pass
+        node1, node2 = self.exemples_de_node()
+        self.assertEqual(node1.indegree() == 0)
+        self.assertEqual(node2.indegree() == 2)
 
     def test_outdegree(self):
-        pass
+        node1, node2 = self.exemples_de_node()
+        self.assertEqual(node1.outdegree() == 7)
+        self.assertEqual(node2.outdegree() == 4)
 
     def test_degree(self):
-        pass
+        node1, node2 = self.exemples_de_node()
+        self.assertEqual(node1.degree() == 7)
+        self.assertEqual(node2.degree() == 6)
 
 
 class GraphTest(unittest.TestCase):
@@ -213,10 +227,12 @@ class GraphTest(unittest.TestCase):
 
     '''TEST TD6'''
 
-    def exemple_de_graphe(self):
+    def exemples_de_graphe(self):
         '''
-        on crée un graph exemple qu'on réutilisera pour les tests
-        '''
+        on crée deux graph exemples qu'on réutilisera pour les tests
+        return le couple (g,h)
+        avec g un graph logique cohérant
+        et h cyclique et incohérant
         '''
         node1 = odgraph.node(0,'',[],[1])
         node2 = odgraph.node(1,'&',[0,2],[])
@@ -224,29 +240,41 @@ class GraphTest(unittest.TestCase):
         node4 = odgraph.node(3,'|',[0,2],[4])
         node5 = odgraph.node(4,'~',[3],[])
         nodelist = [node1,node2,node3,node4,node5]
-        g = odgraph.open_digraph([0,2], [1,4], n0list)
-        g.add_edge(0, 1)
-        g.add_edge(0, 3)
-        g.add_edge(2, 1)
-        g.add_edge(2, 3)
-        g.add_edge(3, 4)
-        return g
-        '''
-        pass
+        g = odgraph.open_digraph([0,2], [1,4], nodelist)
+
+        node6 = odgraph.node(5,'&',[6],[6])
+        node7 = odgraph.node(6,'~',[5],[5,7])
+        node8 = odgraph.node(7,'&',[6],[])
+        node9 = odgraph.node(8,'',[],[5])
+        nodelist2 = [node6,node7,node8,node9]
+        h = odgraph.open_digraph([5,5,6],[5,7], nodelist2)
+
+        return (g,h)
+
     def test_max_indegree(self):
-        pass
+        g,h = self.exemples_de_graphe()
+        self.assertEqual(g.max_indegree() == 2)
+        self.assertEqual(h.max_indegree() == 3)
 
     def test_min_indegree(self):
-        pass
+        g,h = self.exemples_de_graphe()
+        self.assertEqual(g.min_indegree() == 1)
+        self.assertEqual(h.min_indegree() == 0)
 
     def test_max_outdegree(self):
-        pass
+        g,h = self.exemples_de_graphe()
+        self.assertEqual(g.max_outdegree() == 2)
+        self.assertEqual(h.max_outdegree() == 3)
 
     def test_min_outdegree(self):
-        pass
+        g,h = self.exemples_de_graphe()
+        self.assertEqual(g.min_outdegree() == 1)
+        self.assertEqual(h.min_outdegree() == 0)
 
     def test_is_cyclic(self):
-        pass
+        g,h = self.exemples_de_graphe()
+        self.assertEqual(g.is_cyclic() == False)
+        self.assertEqual(h.is_cyclic() == True)
 
 class BoolCircTest(unittest.TestCase):
     '''TEST TD6'''
