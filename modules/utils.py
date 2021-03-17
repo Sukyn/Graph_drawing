@@ -1,5 +1,7 @@
 import random
-import open_digraph as odgraph
+import sys
+sys.path.append('../')
+import modules.open_digraph as odgraph
 
 def remove_all(l, x):
     try:

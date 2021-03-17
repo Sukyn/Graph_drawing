@@ -89,6 +89,17 @@ class NodeTest(unittest.TestCase):
         n0.remove_child_id_all(3)
         self.assertEqual(n0.get_children_ids(), [4])
 
+    '''TEST TD6'''
+    def test_indegree(self):
+        pass
+
+    def test_outdegree(self):
+        pass
+
+    def test_degree(self):
+        pass
+
+
 class GraphTest(unittest.TestCase):
     def test_repr(self):
         n0list = [node(i, '{}'.format(i), [], [1]) for i in range(5)]
@@ -199,5 +210,58 @@ class GraphTest(unittest.TestCase):
         matrix = g_good.adjacency_matrix()
         for lin in matrix:
             print(lin)
+
+    '''TEST TD6'''
+
+    def exemple_de_graphe(self):
+        '''
+        on crée un graph exemple qu'on réutilisera pour les tests
+        '''
+        '''
+        node1 = odgraph.node(0,'',[],[1])
+        node2 = odgraph.node(1,'&',[0,2],[])
+        node3 = odgraph.node(2,'',[],[3])
+        node4 = odgraph.node(3,'|',[0,2],[4])
+        node5 = odgraph.node(4,'~',[3],[])
+        nodelist = [node1,node2,node3,node4,node5]
+        g = odgraph.open_digraph([0,2], [1,4], n0list)
+        g.add_edge(0, 1)
+        g.add_edge(0, 3)
+        g.add_edge(2, 1)
+        g.add_edge(2, 3)
+        g.add_edge(3, 4)
+        return g
+        '''
+        pass
+    def test_max_indegree(self):
+        pass
+
+    def test_min_indegree(self):
+        pass
+
+    def test_max_outdegree(self):
+        pass
+
+    def test_min_outdegree(self):
+        pass
+
+    def test_is_cyclic(self):
+        pass
+
+class BoolCircTest(unittest.TestCase):
+    '''TEST TD6'''
+
+    def test_init(self):
+        #ct = bool_circ()
+        pass
+
+    def test_to_graph(self):
+        self.assertIsInstance(self, open_digraph)
+        pass
+
+    def test_is_well_formed(self):
+        pass
+
+
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run
