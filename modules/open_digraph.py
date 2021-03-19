@@ -16,6 +16,8 @@ class node:
         self.label = label
         self.parents = parents
         self.children = children
+        self.fromworld = 0
+        self.toworld = 0
 
     def __str__(self):
         '''
@@ -121,19 +123,26 @@ class node:
         remove_all(self.children, id)
 
     def indegree(self):
-        #QUESTION 3
-        '''calcule le degré entrant'''
-        return len(self.parents())
+        '''
+        **TYPE** int
+        returns the indegree of the node, i.e. the number of parents it has
+        '''
+        return len(self.get_parent_ids()) + self.fromworld
 
     def outdegree(self):
-        #QUESTION 3
-        '''calcule le degré sortant'''
-        return len(self.children())
+        '''
+        **TYPE** int
+        returns the outdegree of the node, i.e. the number of children it has
+        '''
+        return len(self.get_children_ids()) + self.toworld
 
     def degree(self):
-        #QUESTION 3
-        '''Returns the total degree of the node'''
-        return self.outdegree() + self.indregree()
+        '''
+        **TYPE** int
+        returns the total degree of the node, i.e. the number of
+        parents and children it has
+        '''
+        return self.outdegree() + self.indegree()
 
 
 
@@ -169,17 +178,20 @@ class open_digraph: # for open directed graph
         self.inputs = inputs
         self.outputs = outputs
         self.nodes = {node.id:node for node in nodes} # self.nodes: <int,node> dict
-        self.ids = [node.id for node in nodes]
-
-
+        for inp in inputs:
+            if inp in self.nodes:
+                self.get_node_by_id(inp).fromworld += 1
+        for outp in outputs:
+            if outp in self.nodes:
+                self.get_node_by_id(outp).toworld += 1
 
 
     def __str__(self):
         '''
         '''
         # **EXAMPLE** ([0, 1], [2], 4)
-        return ("("+str(self.inputs)+", "+str(self.nodes)
-                    +", "+str(self.outputs)+")")
+        return ("("+str(self.inputs)+", "+str(self.outputs)
+                    +", "+str(self.nodes)+")")
 
     def __repr__(self):
         '''
@@ -223,7 +235,7 @@ class open_digraph: # for open directed graph
     def get_nodes_by_ids(self, idlist):
         return [self.nodes[i] for i in idlist]
     def get_length(self):
-        return len(self.ids)
+        return len(self.nodes)
     '''
     SETTERS
     functions to modify the attributes of the object
@@ -301,9 +313,9 @@ class open_digraph: # for open directed graph
         remove the node with the id
         '''
         for parent in self.get_node_by_id(id).parents :
-            parent.remove_child_id_all(id)
+            self.get_node_by_id(parent).remove_child_id_all(id)
         for child in self.get_node_by_id(id).children :
-            child.remove_parent_id_all(id)
+            self.get_node_by_id(child).remove_parent_id_all(id)
         del self.nodes[id]
 
 
@@ -418,44 +430,61 @@ class open_digraph: # for open directed graph
 
 
     def max_indegree(self):
-        #QUESTION 4
-        '''Calcul le degré entrant maximum'''
+        '''
+        **TYPE** int
+        returns the maximum indegree of the graph,
+        i.e. the maximum of each node's indegree
+        '''
         return max([node.indegree() for node in self.get_nodes()])
 
     def min_indegree(self):
-        #QUESTION 4
-        '''Calcul le degré entrant minimum'''
+        '''
+        **TYPE** int
+        returns the minimum indegree of the graph,
+        i.e. the minimum of each node's indegree
+        '''
         return min([node.indegree() for node in self.get_nodes()])
 
     def max_outdegree(self):
-        #QUESTION 4
-        '''Calcul le degré sortant maximum'''
+        '''
+        **TYPE** int
+        returns the maximum outdegree of the graph,
+        i.e. the maximum of each node's outdegree
+        '''
         return max([node.outdegree() for node in self.get_nodes()])
 
     def min_outdegree(self):
-        #QUESTION 4
-        '''Calcul le degré sortant minimum'''
+        '''
+        **TYPE** int
+        returns the miniimum indegree of the graph,
+        i.e. the miniimum of each node's outdegree
+        '''
         return min([node.outdegree() for node in self.get_nodes()])
 
     def is_cyclic(self):
-        #QUESTION 5
-        '''Teste la cyclicité du graphe'''
-        g = self.copy()
+        '''
+        **TYPE** boolean
+        TRUE if the graph is cyclic
+        cyclic means that there is a path from a node to itself
+        '''
+        g = self.copy() # We make a copy to avoid removing nodes to the graph
         def sub_is_cyclic(g):
-            if (g.get_nodes() == []):
+            # If there is no node in the graph, it is acyclic by definition
+            if not g.get_nodes():
                 return False
             else:
-                has_leaf = False
-                leaf = 0
                 for node in g.get_nodes():
-                    if (node.get_children_ids() == [] or node.get_parent_ids() == []):
+                    # We check if the node is a leaf (i.e. no children or no parents)
+
+                    if not node.get_children_ids() or not node.get_parent_ids():
                         leaf = node.get_id()
-                        has_leaf = True
-                        break
-                if (not has_leaf):
-                    return True
-                else:
-                    return sub_is_cyclic(g.remove_node_by_id(leaf))
+                        # If you remove a leaf to a graph, and that this child graph is cyclic,
+                        # it means that the original graph is cyclic, and this is the same
+                        # for acyclic graphs
+                        g.remove_node_by_id(leaf)
+                        return sub_is_cyclic(g)
+                # If there are nodes BUT not any leaf, it means that the graph is a cycle
+                return True
         return sub_is_cyclic(g)
 
 
@@ -476,13 +505,14 @@ class open_digraph: # for open directed graph
 
 class bool_circ(open_digraph):
     def __init__(self, g):
-        #QUESTION 1
-        '''Si g est une instance d’open_digraph, alors bool_circ(g)
-        cree un circuit booleen en utilisant g. On ne se preoccupe pas ici de savoir si le graphe g
-        est un circuit booleen valable'''
-        self = super().__init__(g.inputs, g.outputs, g.nodes, g.ids)
-        #QUESTION 7
-        '''Modifier la methode __init__ de bool_circ pour qu’elle teste si le graphe donne est bien un circuit booleen.'''
+        '''
+        **TYPE** boolean
+        g: open_digraph
+        returns True if the graph g is a boolean circuit, and creates the instance
+        '''
+        nodes = [g.nodes[node] for node in g.nodes]
+        self = super().__init__(g.inputs, g.outputs, nodes)
+        # We check that the boolean circuit is well formed, to know if we can actually create it
         return self.is_well_formed()
 
     def to_graph(self):

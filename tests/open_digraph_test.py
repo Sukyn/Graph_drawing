@@ -100,18 +100,18 @@ class NodeTest(unittest.TestCase):
 
     def test_indegree(self):
         node1, node2 = self.exemples_de_node()
-        self.assertEqual(node1.indegree() == 0)
-        self.assertEqual(node2.indegree() == 2)
+        self.assertEqual(node1.indegree(), 0)
+        self.assertEqual(node2.indegree(), 2)
 
     def test_outdegree(self):
         node1, node2 = self.exemples_de_node()
-        self.assertEqual(node1.outdegree() == 7)
-        self.assertEqual(node2.outdegree() == 4)
+        self.assertEqual(node1.outdegree(), 7)
+        self.assertEqual(node2.outdegree(), 4)
 
     def test_degree(self):
         node1, node2 = self.exemples_de_node()
-        self.assertEqual(node1.degree() == 7)
-        self.assertEqual(node2.degree() == 6)
+        self.assertEqual(node1.degree(), 7)
+        self.assertEqual(node2.degree(), 6)
 
 
 class GraphTest(unittest.TestCase):
@@ -234,15 +234,15 @@ class GraphTest(unittest.TestCase):
         avec g un graph logique cohérant
         et h cyclique et incohérant
         '''
-        node1 = odgraph.node(0,'',[],[1])
+        node1 = odgraph.node(0,'',[],[1, 3])
         node2 = odgraph.node(1,'&',[0,2],[])
-        node3 = odgraph.node(2,'',[],[3])
+        node3 = odgraph.node(2,'',[],[1, 3])
         node4 = odgraph.node(3,'|',[0,2],[4])
         node5 = odgraph.node(4,'~',[3],[])
         nodelist = [node1,node2,node3,node4,node5]
         g = odgraph.open_digraph([0,2], [1,4], nodelist)
 
-        node6 = odgraph.node(5,'&',[6],[6])
+        node6 = odgraph.node(5,'&',[6, 8],[6])
         node7 = odgraph.node(6,'~',[5],[5,7])
         node8 = odgraph.node(7,'&',[6],[])
         node9 = odgraph.node(8,'',[],[5])
@@ -253,32 +253,34 @@ class GraphTest(unittest.TestCase):
 
     def test_max_indegree(self):
         g,h = self.exemples_de_graphe()
-        self.assertEqual(g.max_indegree() == 2)
-        self.assertEqual(h.max_indegree() == 3)
+        self.assertEqual(g.max_indegree(), 2)
+        print(h)
+        self.assertEqual(h.max_indegree(), 4)
 
     def test_min_indegree(self):
         g,h = self.exemples_de_graphe()
-        self.assertEqual(g.min_indegree() == 1)
-        self.assertEqual(h.min_indegree() == 0)
+        self.assertEqual(g.min_indegree(), 1)
+        self.assertEqual(h.min_indegree(), 0)
 
     def test_max_outdegree(self):
         g,h = self.exemples_de_graphe()
-        self.assertEqual(g.max_outdegree() == 2)
-        self.assertEqual(h.max_outdegree() == 3)
+        self.assertEqual(g.max_outdegree(), 2)
+        self.assertEqual(h.max_outdegree(), 2)
 
     def test_min_outdegree(self):
         g,h = self.exemples_de_graphe()
-        self.assertEqual(g.min_outdegree() == 1)
-        self.assertEqual(h.min_outdegree() == 0)
+        self.assertEqual(g.min_outdegree(), 1)
+        self.assertEqual(h.min_outdegree(), 1)
 
     def test_is_cyclic(self):
         g,h = self.exemples_de_graphe()
-        self.assertEqual(g.is_cyclic() == False)
-        self.assertEqual(h.is_cyclic() == True)
+        self.assertEqual(g.is_cyclic(), False)
+        self.assertEqual(h.is_cyclic(), True)
 
 class BoolCircTest(unittest.TestCase):
     '''TEST TD6'''
 
+    '''
     def test_init(self):
         #ct = bool_circ()
         pass
@@ -289,7 +291,7 @@ class BoolCircTest(unittest.TestCase):
 
     def test_is_well_formed(self):
         pass
-
+    '''
 
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run
