@@ -201,6 +201,16 @@ class open_digraph: # for open directed graph
         '''
         return "open_digraph"+str(self)
 
+    def __eq__(self, g):
+        '''
+        **TYPE** boolean
+        return self == g
+        '''
+        inp = self.inputs == g.inputs
+        out = self.outputs == g.outputs
+        node = self.nodes == g.nodes
+        return inp and out and node
+
     def empty():
         '''
         **TYPE** void
@@ -512,7 +522,7 @@ class bool_circ(open_digraph):
         nodes = [g.nodes[node] for node in g.nodes]
         self = super().__init__(g.inputs, g.outputs, nodes)
         # We check that the boolean circuit is well formed, to know if we can actually create it
-        return self.is_well_formed()
+        return bool_circ.is_well_formed()
 
     def to_graph(self):
         #QUESTION 2

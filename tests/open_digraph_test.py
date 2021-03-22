@@ -279,19 +279,102 @@ class GraphTest(unittest.TestCase):
 
 class BoolCircTest(unittest.TestCase):
     '''TEST TD6'''
+    def exemples_de_graphe(self):
+        '''
+        on crée deux graph exemples qu'on réutilisera pour les tests
+        return le quadruplet (g,h,i,j)
+        avec g un graph logique cohérant
+        h incohérant et cyclique
+        i cyclique et cohérant
+        et j non-cyclique et incohérant
+        '''
+        node1 = odgraph.node(0,'',[],[1, 3])
+        node2 = odgraph.node(1,'&',[0,2],[])
+        node3 = odgraph.node(2,'',[],[1, 3])
+        node4 = odgraph.node(3,'|',[0,2],[4])
+        node5 = odgraph.node(4,'~',[3],[])
+        nodelist = [node1,node2,node3,node4,node5]
+        g = odgraph.open_digraph([0,2], [1,4], nodelist)
 
-    '''
+        node6 = odgraph.node(5,'&',[6, 8],[6])
+        node7 = odgraph.node(6,'~',[5],[5,7])
+        node8 = odgraph.node(7,'&',[6],[])
+        node9 = odgraph.node(8,'',[],[5])
+        nodelist2 = [node6,node7,node8,node9]
+        h = odgraph.open_digraph([5,5,6],[5,7], nodelist2)
+
+        node10 = odgraph.node(1,'',[],[2])
+        node11 = odgraph.node(2,'&',[1,4],[4])
+        node12 = odgraph.node(3,'',[],[4])
+        node13 = odgraph.node(4,'|',[2,3],[2])
+        nodelist3 = [node10,node11,node12,node13]
+        i = odgraph.open_digraph([1,3],[],nodelist3)
+
+        node14 = odgraph.node(1,'',[],[2])
+        node15 = odgraph.node(2,'&',[1],[3,4])
+        node16 = odgraph.node(3,'|',[2],[4])
+        node17 = odgraph.node(4,'~',[2,3],[5])
+        node18 = odgraph.node(5,'',[4,4],[])
+        nodelist4 = [node14,node15,node16,node17,node18]
+        j = odgraph.open_digraph([],[],nodelist4)
+        return (g,h,i,j)
+
     def test_init(self):
-        #ct = bool_circ()
-        pass
+        node1 = odgraph.node(0,'',[],[1, 3])
+        node2 = odgraph.node(1,'&',[0,2],[])
+        node3 = odgraph.node(2,'',[],[1, 3])
+        node4 = odgraph.node(3,'|',[0,2],[4])
+        node5 = odgraph.node(4,'~',[3],[])
+        nodelist = [node1,node2,node3,node4,node5]
+        g = odgraph.open_digraph([0,2], [1,4], nodelist)
+        b1 = bool_circ(g)
+
+        self.assertEqual(b1.inputs, [0,2])
+        self.assertEqual(b1.outputs, [1,4])
+        self.assertEqual(b1.nodes, nodelist)
+
+        node6 = odgraph.node(5,'&',[6, 8],[6])
+        node7 = odgraph.node(6,'~',[5],[5,7])
+        node8 = odgraph.node(7,'&',[6],[])
+        node9 = odgraph.node(8,'',[],[5])
+        nodelist2 = [node6,node7,node8,node9]
+        h = odgraph.open_digraph([5,5,6],[5,7], nodelist2)
+        b2 = bool_circ(h)
+
+        self.assertEqual(b2.inputs, [5,5,6])
+        self.assertEqual(b2.outputs, [5,7])
+        self.assertEqual(b2.nodes, nodelist2)
 
     def test_to_graph(self):
-        self.assertIsInstance(self, open_digraph)
-        pass
+        #creation of an open_digraph
+        (g1,g2,g3,g4) = self.exemples_de_graphe()
+
+        #creation of the bool_circ from the open_digraphs
+        b1 = odgraph.bool_circ(g1)
+        b2 = odgraph.bool_circ(g2)
+        b3 = odgraph.bool_circ(g3)
+        b4 = odgraph.bool_circ(g4)
+        #convertion of the bool_circs into open_digraphs
+        b1.to_graph()
+        b2.to_graph()
+        b3.to_graph()
+        b4.to_graph()
+        #test the equalities
+        self.assertEqual(b1,g1)
+        self.assertEqual(b2, g2)
+        self.assertEqual(b3, g3)
+        self.assertEqual(b4, g4)
 
     def test_is_well_formed(self):
-        pass
-    '''
+        (g,h,i,j) = self.exemples_de_graphe()
+        self.assertEqual(g, True)
+        self.assertEqual(h, False)
+        self.assertEqual(i, False)
+        self.assertEqual(j, False)
+
+
+        #creation of a 3 node bool_circ cyclic :
+
 
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run
