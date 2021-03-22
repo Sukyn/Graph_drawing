@@ -206,9 +206,9 @@ class open_digraph: # for open directed graph
         **TYPE** boolean
         return self == g
         '''
-        inp = self.inputs == g.inputs
-        out = self.outputs == g.outputs
-        node = self.nodes == g.nodes
+        inp = (self.inputs == g.inputs).all()
+        out = (self.outputs == g.outputs).all()
+        node = (self.nodes == g.nodes).all()
         return inp and out and node
 
     def empty():
