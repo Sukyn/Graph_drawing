@@ -43,6 +43,12 @@ class point:
         function that defines the substraction of two points'''
         return point(self.x - p2.x, self.x - p2.y)
 
+    def equal(self,p2):
+        '''
+        **TYPE**: bool
+        function that tests if two points are equal'''
+        return self.x == p2.x and self.y == p2.y
+
     def rotate(self, theta, c = None):
         '''
         **TYPE**: point
@@ -60,30 +66,43 @@ class point:
         return (x, y)
 
 def drawarrows(self, p1, p2, n = 1, m = 0):
-    '''method that describes how to make an arrow from point p1 to point p2'''
+    '''
+    **TYPE**void
+    p1 : point 1
+    p2: point 2
+    n = number of edges from p1 to p2
+    m = number of edges from p2 to p1
+    method that describes how to make an arrow from point p1 to point p2
+    '''
     #the class must have a line() method, ImageDraw has it, it draws a black line from p1.n() to p2.n()
-    self.line([p1.n(), p2.n()], 'black')
-    a = slope_angle(p1,p2)
-    if(p1.x>p2.y):
-        p1a = point(p1.x-10,p1.y-10)
-        p1b = point(p1.x-10,p1.y+10)
-        p2a = point(p2.x+10,p2.y-10)
-        p2b = point(p2.x+10,p2.y+10)
-    else:
-        p1a = point(p1.x+10,p1.y-10)
-        p1b = point(p1.x+10,p1.y+10)
-        p2a = point(p2.x-10,p2.y-10)
-        p2b = point(p2.x-10,p2.y+10)
-    if(m>0):
-        p1a = point(*p1a.rotate(a,p1))
-        p1b = point(*p1b.rotate(a,p1))
-        self.line([p1.n(), p1a.n()], 'red')
-        self.line([p1.n(), p1b.n()], 'red')
-    if(n>0):
-        p2a = point(*p2a.rotate(a,p2))
-        p2b = point(*p2b.rotate(a,p2))
-        self.line([p2.n(), p2a.n()], 'blue')
-        self.line([p2.n(), p2b.n()], 'blue')
+    if(not(p1.equal(p2))):
+        self.line([p1.n(), p2.n()], 'black') #no need to draw the arrows if the points are merged
+        a = -slope_angle(p1,p2) #we calculate the slope angle for the rotation of the ends of the arrows
+        #we place the ends of the arrows on the points p1 and p2, in the direction of the right or the left according to their position on the x axis
+        if(p1.x>p2.x):
+            p1a = point(p1.x-10,p1.y-10)
+            p1b = point(p1.x-10,p1.y+10)
+            p2a = point(p2.x+10,p2.y-10)
+            p2b = point(p2.x+10,p2.y+10)
+        else:
+            p1a = point(p1.x+10,p1.y-10)
+            p1b = point(p1.x+10,p1.y+10)
+            p2a = point(p2.x-10,p2.y-10)
+            p2b = point(p2.x-10,p2.y+10)
+        if(m>0):
+            #we give a rotation to the ends of the arrows according to the line between p1 and p2
+            p1a = point(*p1a.rotate(a,p1))
+            p1b = point(*p1b.rotate(a,p1))
+            self.line([p1.n(), p1a.n()], 'red')
+            self.line([p1.n(), p1b.n()], 'red')
+            self.text((p1.x,p1.y + 20), str(m), fill ='black')
+        if(n>0):
+            #we give a rotation to the ends of the arrows according to the line between p1 and p2
+            p2a = point(*p2a.rotate(a,p2))
+            p2b = point(*p2b.rotate(a,p2))
+            self.line([p2.n(), p2a.n()], 'blue')
+            self.line([p2.n(), p2b.n()], 'blue')
+            self.text((p2.x,p2.y + 20), str(n), fill ='black')
     #we define the method 'arrows' from the function 'arrows' above
 
 ImageDraw.ImageDraw.arrows = drawarrows
@@ -189,10 +208,10 @@ def slope_angle(p1,p2):
     **TYPE** float
     p1: point; the first point
     p2: point; the second point
-    calculation of the angle between the abscissa axe and the
+    calculation of the angle in radian between the abscissa axe and the line from p1 to p2
     '''
-    if (p1.x == p2.x): #if the line from p1 to p2 is parallel to the x-axis
-        return 0
+    if (p1.x == p2.x): #if the line from p1 to p2 is perpendicular to the x-axis
+        return -(math.pi)/2
     else:
         coeff_direct = (p1.y - p2.y)/(p1.x - p2.x) #leading coefficient calculation
         return math.atan(coeff_direct)
@@ -207,11 +226,11 @@ centre = point(width/2, height/2)
 
 n0list = [odgraph.node(i, '{}'.format(i), [], [1]) for i in range(8)]
 g = odgraph.open_digraph([1], [2], n0list)
-g.add_edge(1, 2)
+#g.add_edge(1, 2)
 #draw.graph(g,'random')
 #draw.graph(g,'circle',{0:point(50,20),1:point(130,70),2:point(300,250)},[point(2,2)], [point(400,400)])
-pasOrigine = point(300,79)
-draw.arrows(pasOrigine,centre, 1, 1)
+pasOrigine = point(33,200)
+draw.arrows(pasOrigine,centre, 4, 1)
 #draw.drawnode(node, pasOrigine,True)
 
 image.save("test.jpg")
