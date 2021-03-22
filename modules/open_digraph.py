@@ -406,7 +406,6 @@ class open_digraph: # for open directed graph
         change all of the node_ids by new_ids
         '''
         list = sorted(zip(new_ids, node_ids), key = lambda x: x[0])
-        print(list)
         for new_id, node_id in list:
             self.change_id(new_id, node_id)
 
@@ -474,9 +473,8 @@ class open_digraph: # for open directed graph
                 return False
             else:
                 for node in g.get_nodes():
-                    # We check if the node is a leaf (i.e. no children or no parents)
-
-                    if not node.get_children_ids() or not node.get_parent_ids():
+                    # We check if the node is a leaf (i.e. no children)
+                    if not node.get_children_ids():
                         leaf = node.get_id()
                         # If you remove a leaf to a graph, and that this child graph is cyclic,
                         # it means that the original graph is cyclic, and this is the same
