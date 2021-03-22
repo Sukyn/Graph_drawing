@@ -518,7 +518,7 @@ class bool_circ(open_digraph):
         #QUESTION 2
         '''
         **TYPE** open_digraph
-        convert a bool_circ into a open_digraph and return it
+        That fonction converts a bool_circ into a open_digraph and return it
         '''
         return open_digraph(self.input_ids(), self.get_output_ids(), self.get_nodes(), self.get_ids())
 
@@ -526,15 +526,17 @@ class bool_circ(open_digraph):
         #QUESTION 6
         '''
         **TYPE** boolean
-        Teste si le circuit booléen est bien formé
-        i.e. acyclique et respecter les contraintes de degré données
+        That fonction tests if the bool_circ is well formed.
+        i.e. if he is acyclic and respects th degrees constraints
 
-        Par la suite, on pourra  ́egalement se permettre d’avoir des noeuds  ́
-        étiquetes ’0’ et ’1’ pour representer les constantes 0 et 1.
-        Pour être  un  circuit  booleen  valide,  tous  les  noeuds  “copie”  doivent
-        avoir exactement  une  entree  (i.e.  doivent  avoir  un  degre  entrant  ́egal  à  1) ;
-        chaque porte ET et OU doit avoir exactement une sortie ;
-        chaque porte NON doit avoir exactement une entree et une sortie.'''
+        We could have nodes with the '0' or the '1' value to represent the 0 and 1 constants
+
+        A well formed bool_circ :
+        - has all of his copy nodes with one input
+        - has all of his AND and OR gates with one output
+        - has all of his NOT gate with one input and one output
+        - is not cyclic
+        '''
         if self.to_graph().is_cyclic():
             return False
         else:
