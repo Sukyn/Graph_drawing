@@ -59,27 +59,31 @@ class point:
         y = -x_t*math.sin(theta) + y_t*math.cos(theta) + c.y
         return (x, y)
 
-def drawarrows(self, p1, p2, n = O, m = O):
+def drawarrows(self, p1, p2, n = 1, m = 0):
     '''method that describes how to make an arrow from point p1 to point p2'''
     #the class must have a line() method, ImageDraw has it, it draws a black line from p1.n() to p2.n()
     self.line([p1.n(), p2.n()], 'black')
-
-    #pas fini, non testé
-    angle = slope_angle(p1,p2)
-    if(n>0):
-        p1a = p1.sub(point(10,0))
-        p1b = p1.sub(point(10,0))
-        p1a.rotate(abs(angle-(math.pi/4)),p1)
-        p1b.rotate(abs(angle-(math.pi/4))+math.pi/2,p1)
-        self.line([p1.n(), p1a.n()], 'black')
-        self.line([p1.n(), p1b.n()], 'black')
+    a = slope_angle(p1,p2)
+    if(p1.x>p2.y):
+        p1a = point(p1.x-10,p1.y-10)
+        p1b = point(p1.x-10,p1.y+10)
+        p2a = point(p2.x+10,p2.y-10)
+        p2b = point(p2.x+10,p2.y+10)
+    else:
+        p1a = point(p1.x+10,p1.y-10)
+        p1b = point(p1.x+10,p1.y+10)
+        p2a = point(p2.x-10,p2.y-10)
+        p2b = point(p2.x-10,p2.y+10)
     if(m>0):
-        p2a = p2.sub(point(10,0))
-        p2b = p2.sub(point(10,0))
-        p2a.rotate(abs(angle-(math.pi/4)),p2)
-        p2b.rotate(abs(angle-(math.pi/4))+math.pi/2,p2)
-        self.line([p2.n(), p2a.n()], 'black')
-        self.line([p2.n(), p2b.n()], 'black')
+        p1a = point(*p1a.rotate(a,p1))
+        p1b = point(*p1b.rotate(a,p1))
+        self.line([p1.n(), p1a.n()], 'red')
+        self.line([p1.n(), p1b.n()], 'red')
+    if(n>0):
+        p2a = point(*p2a.rotate(a,p2))
+        p2b = point(*p2b.rotate(a,p2))
+        self.line([p2.n(), p2a.n()], 'blue')
+        self.line([p2.n(), p2b.n()], 'blue')
     #we define the method 'arrows' from the function 'arrows' above
 
 ImageDraw.ImageDraw.arrows = drawarrows
@@ -187,14 +191,11 @@ def slope_angle(p1,p2):
     p2: point; the second point
     calculation of the angle between the abscissa axe and the
     '''
-    coeff_direct = (p1.y - p2.y)/(p1.x - p2.x) #leading coefficient calculation
-    ordonne_origine = p1.y - coeff_direct* p1.x #origin ordinate calculation
-
-    y = coeff_direct                    #calculation of the two intersection with the ordinate
-    x = -ordonne_origine/coeff_direct   #and the abscissa
-    return math.atan(y/x)            #the angle calculate by arctan(opp/adj)
-
-
+    if (p1.x == p2.x): #if the line from p1 to p2 is parallel to the x-axis
+        return 0
+    else:
+        coeff_direct = (p1.y - p2.y)/(p1.x - p2.x) #leading coefficient calculation
+        return math.atan(coeff_direct)
 
 
 image = Image.new("RGB", (width, height), 'white')
@@ -207,13 +208,10 @@ centre = point(width/2, height/2)
 n0list = [odgraph.node(i, '{}'.format(i), [], [1]) for i in range(8)]
 g = odgraph.open_digraph([1], [2], n0list)
 g.add_edge(1, 2)
-<<<<<<< HEAD
-=======
 #draw.graph(g,'random')
-draw.graph(g,'circle',{0:point(50,20),1:point(130,70),2:point(300,250)},[point(2,2)], [point(400,400)])
->>>>>>> c50a23eb41c3c7e75e97ffc45b5a948cbb5d11f4
-pasOrigine = point(61,79)
-#draw.arrows(pasOrigine,centre)
+#draw.graph(g,'circle',{0:point(50,20),1:point(130,70),2:point(300,250)},[point(2,2)], [point(400,400)])
+pasOrigine = point(300,79)
+draw.arrows(pasOrigine,centre, 1, 1)
 #draw.drawnode(node, pasOrigine,True)
 
 image.save("test.jpg")

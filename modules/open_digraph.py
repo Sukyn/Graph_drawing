@@ -188,6 +188,7 @@ class open_digraph: # for open directed graph
 
     def __str__(self):
         '''
+        **TYPE** string
         '''
         # **EXAMPLE** ([0, 1], [2], 4)
         return ("("+str(self.inputs)+", "+str(self.outputs)
@@ -516,12 +517,16 @@ class bool_circ(open_digraph):
     def to_graph(self):
         #QUESTION 2
         '''
-        Creer une methode de bool_circ qui convertit le circuit en open_digraph.'''
+        **TYPE** open_digraph
+        convert a bool_circ into a open_digraph and return it
+        '''
         return open_digraph(self.input_ids(), self.get_output_ids(), self.get_nodes(), self.get_ids())
 
     def is_well_formed(self):
         #QUESTION 6
-        '''Teste si le circuit booléen est bien formé
+        '''
+        **TYPE** boolean
+        Teste si le circuit booléen est bien formé
         i.e. acyclique et respecter les contraintes de degré données
 
         Par la suite, on pourra  ́egalement se permettre d’avoir des noeuds  ́

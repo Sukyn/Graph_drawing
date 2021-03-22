@@ -52,7 +52,7 @@ class PointTest(unittest.TestCase):
     assertEqual(p00, p00.rotate(23))
     assertEqual(p01, p10.rotate(math.pi/2))
     assertEqual(p10, p01.rotate(3*math.pi/2))
-    
+
 class ImageTest(unittest.TestCase):
     width = 400
     height = 400
