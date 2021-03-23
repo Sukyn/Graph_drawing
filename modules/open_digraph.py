@@ -481,7 +481,7 @@ class open_digraph: # for open directed graph
         '''
 
         g = self.copy() # We make a copy to avoid removing nodes to the graph
-        
+
         def sub_is_cyclic(g):
             # If there is no node in the graph, it is acyclic by definition
             if not g.get_nodes():
@@ -498,9 +498,9 @@ class open_digraph: # for open directed graph
                         return sub_is_cyclic(g)
                 # If there are nodes BUT not any leaf, it means that the graph is a cycle
                 return True
-        print("*********************************************\n", self)
+        #print("*********************************************\n", self)
         val = sub_is_cyclic(g)
-        print("*----------------------------------------*\n", self)
+        #print("*----------------------------------------*\n", self)
         return val
 
 
@@ -530,9 +530,8 @@ class bool_circ(open_digraph):
         self.outputs = g.get_output_ids()
         self.nodes = g.get_id_node_map()
         # We check that the boolean circuit is well formed, to know if we can actually create it
-    '''    if not self.is_well_formed():
-            print("Attention votre graph n'est pas bien formé : {}".format(self))
-'''
+        if not self.is_well_formed():
+            print("Attention votre circuit n'est pas bien formé : ", g)
 
     def to_graph(self):
         '''
@@ -557,30 +556,22 @@ class bool_circ(open_digraph):
         '''
 
         graph = self.to_graph()
-        #print(graph.get_nodes())
+
+        for node in graph.get_nodes():
+            label = node.get_label()
+            if (label == "x"):
+                if (node.indegree() != 1):
+                    return False
+            if (label == "&"):
+                if (node.outdegree() != 1):
+                    return False
+            if (label == "|" ):
+                if (node.outdegree() != 1):
+                    return False
+            if (label == "~"):
+                if (node.indegree() != 1 or node.outdegree() != 1):
+                    return False
         if graph.is_cyclic():
-            print("x")
             return False
 
-        else:
-            #print(graph.get_nodes())
-            for node in graph.get_nodes():
-                #print(node)
-                label = node.get_label()
-                if (label == "x"):
-                    if (node.indegree() != 1):
-                        print("a")
-                        return False
-                if (label == "&"):
-                    if (node.outdegree() != 1):
-                        print("b")
-                        return False
-                if (label == "|" ):
-                    if (node.outdegree() != 1):
-                        print("c")
-                        return False
-                if (label == "~"):
-                    if (node.indegree() != 1 or node.outdegree() != 1):
-                        print("d")
-                        return False
-            return True
+        return True

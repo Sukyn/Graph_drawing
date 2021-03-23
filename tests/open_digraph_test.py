@@ -369,37 +369,15 @@ class BoolCircTest(unittest.TestCase):
         self.assertEqual(b4, g4)
 
     def test_is_well_formed(self):
-        #(g1,g2,g3,g4) = self.exemples_de_graphe()
+        (g1,g2,g3,g4) = self.exemples_de_graphe()
 
-        #creation of the bool_circ from the open_digraphs
-        node1 = odgraph.node(0,'x',[],[1, 3])
-        node2 = odgraph.node(1,'&',[0,2],[])
+        # On teste si l'appel de bool_circ print un message d'erreur ou non (il faudra
+        # remplacer par des Raise)
 
-        node3 = odgraph.node(2,'x',[],[1, 3])
-        node4 = odgraph.node(3,'|',[0,2],[4])
-        node5 = odgraph.node(4,'~',[3],[])
-        nodelist = [node1,node2,node3,node4,node5]
-
-        g1 = odgraph.open_digraph([0,2], [1,4], nodelist)
-    
-        b1 = odgraph.bool_circ(g1)
-
-        '''
-        b2 = odgraph.bool_circ(g2)
-
-        b3 = odgraph.bool_circ(g3)
-        b4 = odgraph.bool_circ(g4)
-        '''
-
-        self.assertEqual(b1.is_well_formed(), True)
-
-#        self.assertEqual(b2.is_well_formed(), False)
-#        self.assertEqual(b3.is_well_formed(), False)
-#        self.assertEqual(b4.is_well_formed(), False)
-
-
-        #creation of a 3 node bool_circ cyclic :
-
+        b1 = odgraph.bool_circ(g1) # On n'a pas de message d'erreur
+        b2 = odgraph.bool_circ(g2) # On a bien un message d'erreur
+        b3 = odgraph.bool_circ(g3) # On a bien un message d'erreur
+        b4 = odgraph.bool_circ(g4) # On a bien un message d'erreur
 
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run

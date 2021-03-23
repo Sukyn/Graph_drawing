@@ -4,11 +4,9 @@ sys.path.append('../')
 import modules.open_digraph as odgraph
 
 def remove_all(l, x):
-    try:
-        while(True):
-            l.remove(x)
-    except ValueError:
-        pass
+    while(x in l):
+        l.remove(x)
+
 
 def count_occurence(l, x):
     return l.count(x)
