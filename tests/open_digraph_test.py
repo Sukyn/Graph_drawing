@@ -26,10 +26,12 @@ class NodeTest(unittest.TestCase):
 
     def test_repr(self):
         n0 = node(0, 'i', [], [1])
+        '''
         print("------ NODE STR ------")
         print(n0)
         print("------ NODE REPR ------")
         print(repr(n0))
+        '''
 
     # Tests de copy
     def test_copy(self):
@@ -118,10 +120,12 @@ class GraphTest(unittest.TestCase):
     def test_repr(self):
         n0list = [node(i, '{}'.format(i), [], [1]) for i in range(5)]
         g = open_digraph([1], [2], n0list)
+        '''
         print("------ GRAPHE STR ------")
         print(g)
         print("------ GRAPHE REPR ------")
         print(repr(g))
+        '''
 
     # Tests de Empty
     def test_empty(self):
@@ -222,8 +226,8 @@ class GraphTest(unittest.TestCase):
         good_list = [node(1, '1', [2, 3], [3]), node(2, '2', [], [1]), node(3, '3', [1], [1])]
         g_good = open_digraph([1], [2], good_list)
         matrix = g_good.adjacency_matrix()
-        for lin in matrix:
-            print(lin)
+        '''for lin in matrix:
+            print(lin)'''
 
     '''TEST TD6'''
 
@@ -254,7 +258,6 @@ class GraphTest(unittest.TestCase):
     def test_max_indegree(self):
         g,h = self.exemples_de_graphe()
         self.assertEqual(g.max_indegree(), 2)
-        print(h)
         self.assertEqual(h.max_indegree(), 4)
 
     def test_min_indegree(self):
@@ -329,9 +332,9 @@ class BoolCircTest(unittest.TestCase):
         g = odgraph.open_digraph([0,2], [1,4], nodelist)
         b1 = bool_circ(g)
 
-        self.assertEqual(b1.inputs, [0,2])
-        self.assertEqual(b1.outputs, [1,4])
-        self.assertEqual(b1.nodes, nodelist)
+        self.assertEqual(b1.get_input_ids(), [0,2])
+        self.assertEqual(b1.get_output_ids(), [1,4])
+        self.assertEqual(b1.get_nodes(), nodelist)
 
         node6 = odgraph.node(5,'&',[6, 8],[6])
         node7 = odgraph.node(6,'~',[5],[5,7])
@@ -341,9 +344,9 @@ class BoolCircTest(unittest.TestCase):
         h = odgraph.open_digraph([5,5,6],[5,7], nodelist2)
         b2 = bool_circ(h)
 
-        self.assertEqual(b2.inputs, [5,5,6])
-        self.assertEqual(b2.outputs, [5,7])
-        self.assertEqual(b2.nodes, nodelist2)
+        self.assertEqual(b2.get_input_ids(), [5,5,6])
+        self.assertEqual(b2.get_output_ids(), [5,7])
+        self.assertEqual(b2.get_nodes(), nodelist2)
 
     def test_to_graph(self):
         #creation of an open_digraph
@@ -366,11 +369,33 @@ class BoolCircTest(unittest.TestCase):
         self.assertEqual(b4, g4)
 
     def test_is_well_formed(self):
-        (g,h,i,j) = self.exemples_de_graphe()
-        self.assertEqual(g, True)
-        self.assertEqual(h, False)
-        self.assertEqual(i, False)
-        self.assertEqual(j, False)
+        #(g1,g2,g3,g4) = self.exemples_de_graphe()
+
+        #creation of the bool_circ from the open_digraphs
+        node1 = odgraph.node(0,'x',[],[1, 3])
+        node2 = odgraph.node(1,'&',[0,2],[])
+
+        node3 = odgraph.node(2,'x',[],[1, 3])
+        node4 = odgraph.node(3,'|',[0,2],[4])
+        node5 = odgraph.node(4,'~',[3],[])
+        nodelist = [node1,node2,node3,node4,node5]
+
+        g1 = odgraph.open_digraph([0,2], [1,4], nodelist)
+    
+        b1 = odgraph.bool_circ(g1)
+
+        '''
+        b2 = odgraph.bool_circ(g2)
+
+        b3 = odgraph.bool_circ(g3)
+        b4 = odgraph.bool_circ(g4)
+        '''
+
+        self.assertEqual(b1.is_well_formed(), True)
+
+#        self.assertEqual(b2.is_well_formed(), False)
+#        self.assertEqual(b3.is_well_formed(), False)
+#        self.assertEqual(b4.is_well_formed(), False)
 
 
         #creation of a 3 node bool_circ cyclic :

@@ -30,7 +30,7 @@ class node:
         # children : [5, 6]
         # will return (0, d, [2, 3, 4], [5, 6])
         return ("("+str(self.id)+", "+self.label+", "
-              +str(self.parents)+", "+str(self.children)+")")
+              +str(self.parents)+", "+str(self.children)+") toworld = " + str(self.toworld) + " fromworld = " + str(self.fromworld) )
 
     def __repr__(self):
         '''
@@ -49,7 +49,7 @@ class node:
         **TYPE** node
         function that returns a copy of the object
         '''
-        return node(self.id, self.label, self.parents, self.children)
+        return node(self.get_id(), self.get_label(), self.get_parent_ids().copy(), self.get_children_ids().copy())
 
     '''
     GETTERS
@@ -169,7 +169,7 @@ class node:
 
 class open_digraph: # for open directed graph
 
-    def __init__(self, inputs, outputs, nodes):
+    def __init__(self, inputs, outputs, nodes, new = True):
         '''
         inputs: int list; the ids of the input nodes
         outputs: int list; the ids of the output nodes
@@ -178,12 +178,13 @@ class open_digraph: # for open directed graph
         self.inputs = inputs
         self.outputs = outputs
         self.nodes = {node.id:node for node in nodes} # self.nodes: <int,node> dict
-        for inp in inputs:
-            if inp in self.nodes:
-                self.get_node_by_id(inp).fromworld += 1
-        for outp in outputs:
-            if outp in self.nodes:
-                self.get_node_by_id(outp).toworld += 1
+        if new:
+            for inp in inputs:
+                if inp in self.nodes:
+                    self.get_node_by_id(inp).fromworld += 1
+            for outp in outputs:
+                if outp in self.nodes:
+                    self.get_node_by_id(outp).toworld += 1
 
 
     def __str__(self):
@@ -206,9 +207,9 @@ class open_digraph: # for open directed graph
         **TYPE** boolean
         return self == g
         '''
-        inp = (self.inputs == g.inputs).all()
-        out = (self.outputs == g.outputs).all()
-        node = (self.nodes == g.nodes).all()
+        inp = (self.inputs == g.inputs)
+        out = (self.outputs == g.outputs)
+        node = (self.nodes == g.nodes)
         return inp and out and node
 
     def empty():
@@ -224,7 +225,7 @@ class open_digraph: # for open directed graph
         **TYPE** open_digraph
         function that returns a copy of the object
         '''
-        return open_digraph(self.inputs, self.outputs, self.nodes.values())
+        return open_digraph(self.get_input_ids().copy(), self.get_output_ids().copy(), self.get_nodes().copy())
 
     '''
     GETTERS
@@ -323,11 +324,11 @@ class open_digraph: # for open directed graph
         id: int; id of the node to remove
         remove the node with the id
         '''
-        for parent in self.get_node_by_id(id).parents :
+        for parent in self.get_node_by_id(id).get_parent_ids() :
             self.get_node_by_id(parent).remove_child_id_all(id)
-        for child in self.get_node_by_id(id).children :
+        for child in self.get_node_by_id(id).get_children_ids() :
             self.get_node_by_id(child).remove_parent_id_all(id)
-        del self.nodes[id]
+        self.nodes.pop(id)
 
 
     def remove_edges(self, src_list, tgt_list):
@@ -394,8 +395,9 @@ class open_digraph: # for open directed graph
         change node_id by new_id
         '''
         if(new_id in self.get_node_ids()):
-            print("The node id already exists")
+            #print("The node id already exists")
             #raise
+            pass
         elif(node_id == new_id):
             pass
         else:
@@ -477,7 +479,9 @@ class open_digraph: # for open directed graph
         TRUE if the graph is cyclic
         cyclic means that there is a path from a node to itself
         '''
+
         g = self.copy() # We make a copy to avoid removing nodes to the graph
+        
         def sub_is_cyclic(g):
             # If there is no node in the graph, it is acyclic by definition
             if not g.get_nodes():
@@ -494,7 +498,10 @@ class open_digraph: # for open directed graph
                         return sub_is_cyclic(g)
                 # If there are nodes BUT not any leaf, it means that the graph is a cycle
                 return True
-        return sub_is_cyclic(g)
+        print("*********************************************\n", self)
+        val = sub_is_cyclic(g)
+        print("*----------------------------------------*\n", self)
+        return val
 
 
 
@@ -519,21 +526,22 @@ class bool_circ(open_digraph):
         g: open_digraph
         returns True if the graph g is a boolean circuit, and creates the instance
         '''
-        nodes = [g.nodes[node] for node in g.nodes]
-        self = super().__init__(g.inputs, g.outputs, nodes)
+        self.inputs = g.get_input_ids()
+        self.outputs = g.get_output_ids()
+        self.nodes = g.get_id_node_map()
         # We check that the boolean circuit is well formed, to know if we can actually create it
-        return bool_circ.is_well_formed()
+    '''    if not self.is_well_formed():
+            print("Attention votre graph n'est pas bien formé : {}".format(self))
+'''
 
     def to_graph(self):
-        #QUESTION 2
         '''
         **TYPE** open_digraph
         That fonction converts a bool_circ into a open_digraph and return it
         '''
-        return open_digraph(self.input_ids(), self.get_output_ids(), self.get_nodes(), self.get_ids())
+        return open_digraph(self.get_input_ids(), self.get_output_ids(), self.get_nodes(), new = False)
 
     def is_well_formed(self):
-        #QUESTION 6
         '''
         **TYPE** boolean
         That fonction tests if the bool_circ is well formed.
@@ -547,20 +555,32 @@ class bool_circ(open_digraph):
         - has all of his NOT gate with one input and one output
         - is not cyclic
         '''
-        if self.to_graph().is_cyclic():
+
+        graph = self.to_graph()
+        #print(graph.get_nodes())
+        if graph.is_cyclic():
+            print("x")
             return False
+
         else:
-            for node in self.to_graph().get_nodes():
-                if (node.get_label() == ""):
+            #print(graph.get_nodes())
+            for node in graph.get_nodes():
+                #print(node)
+                label = node.get_label()
+                if (label == "x"):
                     if (node.indegree() != 1):
+                        print("a")
                         return False
-                if (node.get_label() == "&"):
+                if (label == "&"):
                     if (node.outdegree() != 1):
+                        print("b")
                         return False
-                if (node.get_label() == "|" ):
+                if (label == "|" ):
                     if (node.outdegree() != 1):
+                        print("c")
                         return False
-                if (node.get_label() == "~"):
+                if (label == "~"):
                     if (node.indegree() != 1 or node.outdegree() != 1):
+                        print("d")
                         return False
             return True
