@@ -225,7 +225,8 @@ class open_digraph: # for open directed graph
         **TYPE** open_digraph
         function that returns a copy of the object
         '''
-        return open_digraph(self.get_input_ids().copy(), self.get_output_ids().copy(), self.get_nodes().copy())
+        nodelist = [i.copy() for i in self.get_nodes()]
+        return open_digraph(self.get_input_ids().copy(), self.get_output_ids().copy(), nodelist)
 
     '''
     GETTERS
