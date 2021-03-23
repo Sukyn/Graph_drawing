@@ -78,3 +78,8 @@ def random_graph(n, bound, inputs=0, outputs=0, form="free"):
     graphe.set_input_ids(inputs)
     graphe.set_output_ids(outputs)
     return graphe
+
+def invert_permutation(permutation):
+    first = permutation.copy().pop(len(permutation)-1)
+    second = permutation.copy().pop(0)
+    return zip(*zip(first, second).reverse())

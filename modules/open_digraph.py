@@ -169,7 +169,7 @@ class node:
 
 class open_digraph: # for open directed graph
 
-    def __init__(self, inputs, outputs, nodes, new = True):
+    def __init__(self, inputs, outputs, nodes):
         '''
         inputs: int list; the ids of the input nodes
         outputs: int list; the ids of the output nodes
@@ -178,13 +178,12 @@ class open_digraph: # for open directed graph
         self.inputs = inputs
         self.outputs = outputs
         self.nodes = {node.id:node for node in nodes} # self.nodes: <int,node> dict
-        if new:
-            for inp in inputs:
-                if inp in self.nodes:
-                    self.get_node_by_id(inp).fromworld += 1
-            for outp in outputs:
-                if outp in self.nodes:
-                    self.get_node_by_id(outp).toworld += 1
+        for inp in inputs:
+            if inp in self.nodes:
+                self.get_node_by_id(inp).fromworld += 1
+        for outp in outputs:
+            if outp in self.nodes:
+                self.get_node_by_id(outp).toworld += 1
 
 
     def __str__(self):
@@ -256,12 +255,22 @@ class open_digraph: # for open directed graph
     '''
     def set_input_ids(self, new_idlist):
         self.inputs = new_idlist
+        for inp in new_idlist:
+            if inp in self.get_nodes():
+                self.get_node_by_id(inp).fromworld += 1
     def set_output_ids(self, new_idlist):
         self.outputs = new_idlist
+        for outp in new_idlist:
+            if outp in self.get_nodes():
+                self.get_node_by_id(outp).toworld += 1
     def add_input_id(self, new_id):
         self.inputs.append(new_id)
+        if id in self.get_nodes():
+            self.get_node_by_id(id).fromworld += 1
     def add_output_id(self, new_id):
         self.outputs.append(new_id)
+        if id in self.get_nodes():
+            self.get_node_by_id(id).toworld += 1
 
     def new_id(self):
         '''
@@ -420,8 +429,8 @@ class open_digraph: # for open directed graph
         change all of the node_ids by new_ids
         '''
         list = sorted(zip(new_ids, node_ids), key = lambda x: x[0])
-        for new_id, node_id in list:
-            self.change_id(new_id, node_id)
+        for i in range(len(list)):
+            self.change_id(list[i][0], list[i][1])
 
     def normalize_ids(self):
         '''
@@ -499,26 +508,76 @@ class open_digraph: # for open directed graph
                         return sub_is_cyclic(g)
                 # If there are nodes BUT not any leaf, it means that the graph is a cycle
                 return True
-        #print("*********************************************\n", self)
-        val = sub_is_cyclic(g)
-        #print("*----------------------------------------*\n", self)
-        return val
+
+        return sub_is_cyclic(g)
 
 
+    '''TD7'''
+    def min_id (self):
+        return min(self.get_node_ids())
+
+    def max_id (self):
+        return max(self.get_node_ids())
+
+    def shift_indices(self, n):
+        new_ids = [(ids + n) for ids in self.get_nodes_by_ids()]
+        self.change_ids(new_ids, self.get_nodes_by_ids())
+
+    def iparallel(self, g, in_perm, out_perm):
+        if self.max_id() > g.min_id():
+            g = g.copy().shift_indices(g.min_id() - g.max_id() + 1)
+        for inp in g.get_input_ids():
+            self.add_input_id(inp)
+        for outp in g.get_output_ids():
+            self.add_output_id(outp)
+        for node in g.get_nodes():
+            self.get_id_node_map()[node.get_id()] = node
+
+    def parallel(self, g, in_perm, out_perm):
+        return self.copy().iparallel(g, in_perm, out_perm)
+
+    def icompose(self, g):
+        inputs = self.get_input_ids()
+        outputs = g.get_output_ids()
+        if not len(inputs) == len(outputs):
+            raise ValueError
+        else:
+            if(bool(set(inputs).intersection(outputs))): #if the lists 'inputs' and 'outputs' have values in common
+                self.shift_indices(g.max_id() - self.min_id() + 1)
+            for i in range(lenself):
+                self.add_edge(inputs[i],outputs[i])
+
+    def compose(self, g):
+        return self.copy().icompose(g)
 
 
+    def connected_components(self):
+        components = {}
+        g = self.copy()
+        id_connexe = 0
+
+        while g.get_node_ids():
+            nodes = [g.min_id()]
+            for node in nodes:
+                components[node] = id_connexe
+                parents = [n.get_parent_ids() for n in g.get_node_by_ids(node)]
+                children = [n.get_children_ids() for n in g.get_node_by_ids(node)]
+                g.remove_node_by_id(node)
+                nodes += parents + children
+            id_connexe += 1
+        return (id_connexe + 1, components)
 
 
-
-
-
-
-
-
-
-
-
-
+    def graph_permutation(self):
+        nb, compo_id = self.connected_components()
+        components = []
+        for i in range(nb):
+            node_ids = [key for (key, value) in compo_id.items() if value == i])
+            nodes = self.get_nodes_by_ids(node_ids)
+            inputs = [inp for inp in self.get_input_ids() if inp in node_ids]
+            outputs = [outp for outp in self.get_output_ids() if outp in node_ids]
+            components.append(open_digraph(inputs, outputs, nodes))
+        return (components, self.get_input_ids(), self.get_output_ids())
 
 class bool_circ(open_digraph):
     def __init__(self, g):
@@ -556,9 +615,8 @@ class bool_circ(open_digraph):
         - is not cyclic
         '''
 
-        graph = self.to_graph()
 
-        for node in graph.get_nodes():
+        for node inself.get_nodes():
             label = node.get_label()
             if (label == "x"):
                 if (node.indegree() != 1):
@@ -572,7 +630,7 @@ class bool_circ(open_digraph):
             if (label == "~"):
                 if (node.indegree() != 1 or node.outdegree() != 1):
                     return False
-        if graph.is_cyclic():
+        if self.is_cyclic():
             return False
 
         return True

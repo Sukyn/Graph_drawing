@@ -141,7 +141,7 @@ class GraphTest(unittest.TestCase):
         gCopy = g.copy()
         self.assertEqual(gCopy.inputs, g.inputs)
         self.assertEqual(gCopy.outputs, g.outputs)
-        self.assertEqual(gCopy.nodes, g.nodes)
+        self.assertEqual(gCopy.nodes, g.nodes.copy())
 
     # Tests des getters
     def test_getters(self):
@@ -279,6 +279,27 @@ class GraphTest(unittest.TestCase):
         g,h = self.exemples_de_graphe()
         self.assertEqual(g.is_cyclic(), False)
         self.assertEqual(h.is_cyclic(), True)
+
+    '''Test TD7'''
+    def test_min_id (self):
+        g,h = self.exemples_de_graphe()
+        pass
+    def test_max_id (self):
+        pass
+    def test_shift_indices(self, n):
+        pass
+    def test_iparallel(self, g, in_perm, out_perm):
+        pass
+    def test_parallel(self, g, in_perm, out_perm):
+        pass
+    def test_icompose(self, g):
+        pass
+    def test_compose(self, g):
+        pass
+    def test_connected_components(self):
+        pass
+    def test_graph_permutation(self):
+        pass
 
 class BoolCircTest(unittest.TestCase):
     '''TEST TD6'''
