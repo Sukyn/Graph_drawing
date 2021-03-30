@@ -248,6 +248,14 @@ class open_digraph: # for open directed graph
         return [self.nodes[i] for i in idlist]
     def get_length(self):
         return len(self.nodes)
+
+    def multi_getter(self, args):
+        result = []
+        if "parents" in args:
+            result += self.get_nodes_by_ids((self.get_node_by_id(u)).get_parent_ids())
+        if "children" in args:
+            result += self.get_nodes_by_ids((self.get_node_by_id(u)).get_children_ids())
+        return result
     '''
     SETTERS
     functions to modify the attributes of the object
@@ -578,6 +586,58 @@ class open_digraph: # for open directed graph
             outputs = [outp for outp in self.get_output_ids() if outp in node_ids]
             components.append(open_digraph(inputs, outputs, nodes))
         return (components, self.get_input_ids(), self.get_output_ids())
+
+    def dijkstra(self, src, direction = None, tgt = None):
+
+        queue = [src]
+        dist = {src: 0}
+        prev = {}
+
+        while queue:
+            u = self.get_id(min(Q, key = lambda x: dist[x]))
+            queue.remove(u)
+            switcher = {
+                1:"parents",
+                -1:"children",
+                None:["parents", "children"] except the previous one
+            }
+            neighbours = self.multi_getter(switcher.get(direction, "Invalid direction value"))
+            for v in neighbours:
+                if v not in dist:
+                    queue.append(v)
+                if v not in dist or dist[v] > dist[u] + 1:
+                    dist[v] = dist[u] + 1
+                    prev[v] = u
+                if v == tgt:
+                    return (dist[v],prev)
+        return (dist, prev)
+
+    def shortest_path(self, nodeA, nodeB):
+        if not nodeB in self.get_nodes():
+            print("nodeB not in the graph")
+            return None
+        distance, previous = self.dijkstra(nodeA, tgt=nodeB)
+        path = [nodeB]
+        node = nodeB
+        while node != nodeA:
+            node = previous[node]
+            path.insert(0,node)
+
+        if distance != len(path):
+            print("wallah la taille est pas bonne")
+            return None
+        return path
+
+
+
+    def parents_distance(self, nodeA, nodeB):
+        result = {}
+        for nodeA_parent in nodeA.get_parent_ids():
+            for nodeB_parent in nodeB.get_parent_ids():
+                if nodeA_parent = nodeB_parent:
+                    result[nodeA_parent] = (self.dijsktra(nodeA, tgt=nodeA_parent)[0],
+                                            self.monsieur_tra(nodeB, nodeB_parent)[0]) # ???
+        return result
 
 class bool_circ(open_digraph):
     def __init__(self, g):
