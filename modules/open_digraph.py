@@ -487,7 +487,7 @@ class open_digraph: # for open directed graph
         '''
         **TYPE** int
         returns the miniimum indegree of the graph,
-        i.e. the miniimum of each node's outdegree
+        i.e. the minimum of each node's outdegree
         '''
         return min([node.outdegree() for node in self.get_nodes()])
 
@@ -580,12 +580,14 @@ class open_digraph: # for open directed graph
         nb, compo_id = self.connected_components()
         components = []
         for i in range(nb):
-            node_ids = [key for (key, value) in compo_id.items() if value == i])
+            node_ids = [key for (key, value) in compo_id.items() if value == i]
             nodes = self.get_nodes_by_ids(node_ids)
             inputs = [inp for inp in self.get_input_ids() if inp in node_ids]
             outputs = [outp for outp in self.get_output_ids() if outp in node_ids]
             components.append(open_digraph(inputs, outputs, nodes))
         return (components, self.get_input_ids(), self.get_output_ids())
+
+    '''TD8'''
 
     def dijkstra(self, src, direction = None, tgt = None):
 
@@ -599,7 +601,7 @@ class open_digraph: # for open directed graph
             switcher = {
                 1:"parents",
                 -1:"children",
-                None:["parents", "children"] except the previous one
+                #None:["parents", "children"] except the previous one
             }
             neighbours = self.multi_getter(switcher.get(direction, "Invalid direction value"))
             for v in neighbours:
@@ -629,15 +631,76 @@ class open_digraph: # for open directed graph
         return path
 
 
-
     def parents_distance(self, nodeA, nodeB):
         result = {}
         for nodeA_parent in nodeA.get_parent_ids():
             for nodeB_parent in nodeB.get_parent_ids():
-                if nodeA_parent = nodeB_parent:
+                if nodeA_parent == nodeB_parent:
                     result[nodeA_parent] = (self.dijsktra(nodeA, tgt=nodeA_parent)[0],
                                             self.monsieur_tra(nodeB, nodeB_parent)[0]) # ???
         return result
+
+    def topological_sorting(self):
+        '''
+        **TYPE** Two-dimensional list
+        return the topological sorting 'compressed upwards' of the graph
+        '''
+        # We work on a copy of the graph
+        g = self.copy()
+        sorting = []
+        leaves = []
+        # While the graph has nodes
+        while(len(g.get_nodes())>0):
+            for node in g.get_nodes():
+                # We check if the node is a leaf (i.e. no children)
+                if not node.get_children_ids():
+                    leaves.append(node.get_id())
+            # We detect if the graph is cyclic (i.e. if there are no more leaves but the graph is non-empty)
+            if leaves == []:
+                raise ValueError("The graph isn't acyclic")
+            # We get this list of leaves in our sorting table, then we remove these leaves from the graph
+            sorting.append(leaves)
+            leaves = []
+            g.remove_nodes_by_id(leaves)
+        return sorting
+
+    def node_depth(self, node):
+        '''
+        **TYPE** int
+        node: node of the graph
+        returns the node depth, i.e. the index of the sub-list where the id of the node is located in the list returned by the topological_sorting function
+        '''
+        for i, x in enumerate(self.topological_sorting()):
+            if node.get_id() in x:
+                return i
+
+    def graph_depth(self):
+        '''
+        **TYPE** int
+        returns the graph depth, i.e. the number of sub-list in the list returned by the topological_sorting function
+        '''
+        return len(self.topological_sorting())
+
+    def longest_path(self, u, v):
+        dist = {u: 0}
+        prev = {}
+
+        if self.is_cyclic():
+            raise ValueError("The graph isn't acyclic")
+        else:
+            l = self.topological_sorting()
+            k = self.node_depth(u)
+            for i in range(k+1, len(l)): # For depths of more than k
+                for w in l[i]:
+                    if w.get_id() != v.get_id(): # If w node is different to v node
+                        for parent in w.get_parent_ids():
+                            if parent in dist: # If one of the parents of node w is in the dist dictionary
+                                parent_max = max(dict, key=dict.get) # We take the parent of dist maximum
+                                dist[w] = dist[parent] + 1 # We give the value of parent_max to dist[w]
+                                prev[w] = parent_max # We save the parent_max node in prev[w]
+
+        return dist, prev
+
 
 class bool_circ(open_digraph):
     def __init__(self, g):
@@ -676,7 +739,7 @@ class bool_circ(open_digraph):
         '''
 
 
-        for node inself.get_nodes():
+        for node in self.get_nodes():
             label = node.get_label()
             if (label == "x"):
                 if (node.indegree() != 1):
