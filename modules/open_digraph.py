@@ -244,10 +244,7 @@ class open_digraph: # for open directed graph
         return [i for i in self.nodes]
     def get_node_by_id(self, id):
         return self.nodes[id]
-    def get_node_by_label(self, label):
-        for node in self.get_nodes():
-            if (node.get_label() == label) return node
-        return None
+
 
     def get_nodes_by_ids(self, idlist):
         return [self.nodes[i] for i in idlist]
@@ -536,13 +533,13 @@ class open_digraph: # for open directed graph
         new_ids = [(ids + n) for ids in self.get_nodes_by_ids()]
         self.change_ids(new_ids, self.get_nodes_by_ids())
 
-    def iparallel(self, g, in_perm= None, out_perm = None):
-        if self.max_id() > g.min_id():
-            g = g.copy().shift_indices(g.min_id() - g.max_id() + 1)
+    def iparallel(self, g, in_perm = None, out_perm = None):
         for inp in g.get_input_ids():
             self.add_input_id(inp)
         for outp in g.get_output_ids():
             self.add_output_id(outp)
+        if self.max_id() > g.min_id():
+            g = g.copy().shift_indices(self.max_id() - g.min_id() + 1)
         for node in g.get_nodes():
             self.get_id_node_map()[node.get_id()] = node
 
@@ -606,7 +603,7 @@ class open_digraph: # for open directed graph
             switcher = {
                 1:"parents",
                 -1:"children",
-                #None:["parents", "children"] except the previous one
+                None:["parents", "children"]
             }
             neighbours = self.multi_getter(switcher.get(direction, "Invalid direction value"))
             for v in neighbours:
@@ -631,7 +628,7 @@ class open_digraph: # for open directed graph
             path.insert(0,node)
 
         if distance != len(path):
-            print("wallah la taille est pas bonne")
+            print("La taille n'est pas bonne")
             return None
         return path
 
@@ -703,8 +700,12 @@ class open_digraph: # for open directed graph
                                 parent_max = max(dict, key=dict.get) # We take the parent of dist maximum
                                 dist[w] = dist[parent] + 1 # We give the value of parent_max to dist[w]
                                 prev[w] = parent_max # We save the parent_max node in prev[w]
-
-        return dist, prev
+        path = [v]
+        node = v
+        while node != u:
+            node = previous[node]
+            path.insert(0,node)
+        return path, len(path)
 
     def node_fusion(self, first_id, second_id, label = None):
         '''
@@ -714,7 +715,7 @@ class open_digraph: # for open directed graph
         node_ids = self.get_node_ids()
         #If not, we print an error (n.b : we could just say "okay let's do nothing")
         if first_id not in node_ids or second_id not in node_ids:
-            print("Wallah non il existe pas")
+            print("Il existe pas")
 
         #Getting nodes
         first_node = self.get_node_by_id(first_id) # The one who will be saved
@@ -725,10 +726,15 @@ class open_digraph: # for open directed graph
             first_node.add_input_id(id)
         for id in second_node.get_output_ids():
             first_node.add_output_id(id)
+        #Fusion of parents & children
+        for child_id in second_node.get_children_ids():
+            first_node.add_child_id(child_id)
+        for parent_id in second_node.get_children_ids():
+            first_node.add_child_id(parent_id)
 
         #The user can set his own label to the fusion
         if label:
-            frst_node.set_label((str)label)
+            first_node.set_label(label)
 
         # GO TO HELL WE DON'T NEED YOU ANYMORE
         self.remove_node_by_id(second_id)
@@ -757,36 +763,38 @@ class bool_circ(open_digraph):
                 self = bool_circ(args.pop(0))
                 self.iparallel(bool_circ(args[0]).to_graph())
             else:
-                self = super().__init__([], [], [node(0, '', [], [])])
+                graph = super().__init__([], [], [node(0, '', [], [])])
                 current_node = 0
                 s2 = ""
                 for char in g:
                     if (char == '('):
-
-                        node = self.get_node_by_id(current_node)
+                        node = graph.get_node_by_id(current_node)
                         node.set_label(node.get_label() + s2)
-                        id = self.add_node()
+                        id = graph.add_node()
                         node.add_parent_id(id)
                         current_node = id
                         s2 = ""
                     elif (char == ')'):
-                        node = self.get_node_by_id(current_node)
+                        node = graph.get_node_by_id(current_node)
                         node.set_label(node.get_label() + s2)
-                        # Question 3
-                        same_node = self.get_node_by_label(s2) #We check if there is already a node with the same name
-                        if same_node is not None: #If yes, we melt them
-                            self.node_fusion(node, same_node.get_id())
-
                         current_node = node.get_children_ids()[0].get_id()
                         s2 = ""
                     else:
                         s2 += char
+                #Question 3
+                for node in graph:
+                    for second_node in graph:
+                        if (node.get_label() == second_node.get_label() and node != second_node):
+                            self.node_fusion(node.get_id(), second_node.get_id())
+                for node in graph:
+                    node.set_label("")
 
-        else:
-            self.inputs = g.get_input_ids()
-            self.outputs = g.get_output_ids()
-            self.nodes = g.get_id_node_map()
-            # We check that the boolean circuit is well formed, to know if we can actually create it
+                g = graph
+
+        self.inputs = g.get_input_ids()
+        self.outputs = g.get_output_ids()
+        self.nodes = g.get_id_node_map()
+        # We check that the boolean circuit is well formed, to know if we can actually create it
         if not self.is_well_formed():
             print("Attention votre circuit n'est pas bien formé : ", g)
 
@@ -815,9 +823,6 @@ class bool_circ(open_digraph):
 
         for node in self.get_nodes():
             label = node.get_label()
-            if (label == "x"):
-                if (node.indegree() != 1):
-                    return False
             if (label == "&"):
                 if (node.outdegree() != 1):
                     return False
@@ -827,6 +832,11 @@ class bool_circ(open_digraph):
             if (label == "~"):
                 if (node.indegree() != 1 or node.outdegree() != 1):
                     return False
+            if (label == ""):
+                if (node.indegree() != 1):
+                    return False
+            else:
+                return False
         if self.is_cyclic():
             return False
 

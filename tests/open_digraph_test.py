@@ -283,23 +283,103 @@ class GraphTest(unittest.TestCase):
     '''Test TD7'''
     def test_min_id (self):
         g,h = self.exemples_de_graphe()
-        pass
+        self.assertEqual(g.min_id(),0)
+        self.assertEqual(h.min_id(),5)
     def test_max_id (self):
-        pass
+        g,h = self.exemples_de_graphe()
+        self.assertEqual(g.max_id(),4)
+        self.assertEqual(h.max_id(),8)
     def test_shift_indices(self, n):
-        pass
-    def test_iparallel(self, g, in_perm, out_perm):
-        pass
-    def test_parallel(self, g, in_perm, out_perm):
-        pass
-    def test_icompose(self, g):
-        pass
-    def test_compose(self, g):
-        pass
+        g,h = self.exemples_de_graphe()
+        g.shift_indices(3)
+        self.assertEqual(g.min_id(),3)
+        self.assertEqual(g.max_id(),8)
+        h.shift_indices(100)
+        self.assertEqual(h.min_id(),104)
+        self.assertEqual(h.max_id(),108)
+    def test_iparallel(self):
+        g,h = self.exemples_de_graphe()
+        inputs = g.get_input_ids()
+        g.iparallel(h,[3],[7])
+        self.assertEqual([1,2,3,4,5,6,7,8],g.get_node_ids())
+        self.assertEqual(inputs + h.get_input_ids() + [3,7], g.get_input_ids())
+    def test_parallel(self):
+        g,h = self.exemples_de_graphe()
+        test = odgraph.parallel(h,[3],[7])
+        self.assertEqual([1,2,3,4,5,6,7,8],test.get_node_ids())
+        self.assertEqual(test.get_input_ids(), g.get_input_ids() + h.get_input_ids() + [3,7])
+    def test_icompose(self):
+        g,h = self.exemples_de_graphe()
+        h.icompose(g)
+        assertEqual(h.get_input_ids(), [5,5,6])
+        assertEqual(h.get_output_ids(), [1,4])
+        assertEqual(h.get_node_by_id(5).get_children_ids(), [0,6])
+        assertEqual(h.get_node_by_id(7).get_children_ids(), [2])
+        assertEqual(h.get_node_by_id(0).get_parents_ids(), [5])
+        assertEqual(h.get_node_by_id(2).get_parents_ids(), [7])
+    def test_compose(self):
+        g,h = self.exemples_de_graphe()
+        test = odgraph.compose(h)
+        assertEqual(test.get_input_ids(), [5,5,6])
+        assertEqual(test.get_output_ids(), [1,4])
+        assertEqual(test.get_node_by_id(5).get_children_ids(), [0,6])
+        assertEqual(test.get_node_by_id(7).get_children_ids(), [2])
+        assertEqual(test.get_node_by_id(0).get_parents_ids(), [5])
+        assertEqual(test.get_node_by_id(2).get_parents_ids(), [7])
     def test_connected_components(self):
         pass
     def test_graph_permutation(self):
         pass
+
+    '''Test TD8'''
+    def exemple_td8(self):
+        '''
+        on crée un graphe exemple qu'on réutilisera pour les tests
+        '''
+        node0 = odgraph.node(0,'0',[],[3])
+        node1 = odgraph.node(1,'1',[],[4,5,8])
+        node2 = odgraph.node(2,'2',[],[4])
+        node3 = odgraph.node(3,'3',[0],[5,6,7])
+        node4 = odgraph.node(4,'4',[1,2],[6])
+        node5 = odgraph.node(5,'5',[1,3],[7])
+        node6 = odgraph.node(6,'6',[3,4],[8,9])
+        node7 = odgraph.node(7,'7',[3,5],[])
+        node8 = odgraph.node(8,'8',[1,6],[])
+        node9 = odgraph.node(9,'9',[6],[])
+        nodelist = [node1,node2,node3,node4,node5,node6,node7,node8,node9]
+        g = odgraph.open_digraph([0,2], [7], nodelist)
+        return g
+
+    def test_shortest_path(self):
+        g = self.exemple_td8()
+        self.assertEqual(g.shortest_path(g.get_node_by_id(0),g.get_node_by_id(3)),[g.get_node_by_id(0),g.get_node_by_id(3)])
+        self.assertEqual(g.shortest_path(g.get_node_by_id(0),g.get_node_by_id(7)),[g.get_node_by_id(0),g.get_node_by_id(3),g.get_node_by_id(7)])
+
+    def test_parents_distance(self):
+        g = self.exemple_td8()
+        self.assertEqual(g.parents_distance(g.get_node_by_id(5),g.get_node_by_id(8)), {0 : (2,3), 3 : (1,2), 1 : (1,1)})
+
+    def test_topological_sorting(self):
+        g = self.exemple_td8()
+        self.assertEqual(g.topological_sorting(), [[0, 1, 2], [3, 4], [5, 6], [7, 8, 9]])
+
+    def test_node_depth(self):
+        g = self.exemple_td8()
+        self.assertEqual(node_depth(g.get_node_by_id(0)),0)
+        self.assertEqual(node_depth(g.get_node_by_id(4)),1)
+        self.assertEqual(node_depth(g.get_node_by_id(5)),2)
+        self.assertEqual(node_depth(g.get_node_by_id(7)),3)
+
+    def test_graph_depth(self):
+        g = self.exemple_td8()
+        self.assertEqual(g.graph_depth(),4)
+
+    def test_longest_path(self):
+        g = self.exemple_td8()
+        chemin, distance = g.longest_path(g.get_node_by_id(0),g.get_node_by_id(7))
+        self.assertEqual(chemin,[g.get_node_by_id(0),g.get_node_by_id(3),g.get_node_by_id(5),g.get_node_by_id(7)])
+        self.assertEqual(distance, 4)
+
 
 class BoolCircTest(unittest.TestCase):
     '''TEST TD6'''
