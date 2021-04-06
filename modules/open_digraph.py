@@ -244,6 +244,11 @@ class open_digraph: # for open directed graph
         return [i for i in self.nodes]
     def get_node_by_id(self, id):
         return self.nodes[id]
+    def get_node_by_label(self, label):
+        for node in self.get_nodes():
+            if (node.get_label() == label) return node
+        return None
+
     def get_nodes_by_ids(self, idlist):
         return [self.nodes[i] for i in idlist]
     def get_length(self):
@@ -531,7 +536,7 @@ class open_digraph: # for open directed graph
         new_ids = [(ids + n) for ids in self.get_nodes_by_ids()]
         self.change_ids(new_ids, self.get_nodes_by_ids())
 
-    def iparallel(self, g, in_perm, out_perm):
+    def iparallel(self, g, in_perm= None, out_perm = None):
         if self.max_id() > g.min_id():
             g = g.copy().shift_indices(g.min_id() - g.max_id() + 1)
         for inp in g.get_input_ids():
@@ -701,18 +706,87 @@ class open_digraph: # for open directed graph
 
         return dist, prev
 
+    def node_fusion(self, first_id, second_id, label = None):
+        '''
+        Function that fusion two nodes
+        '''
+        #We check if the nodes are in the graph
+        node_ids = self.get_node_ids()
+        #If not, we print an error (n.b : we could just say "okay let's do nothing")
+        if first_id not in node_ids or second_id not in node_ids:
+            print("Wallah non il existe pas")
+
+        #Getting nodes
+        first_node = self.get_node_by_id(first_id) # The one who will be saved
+        second_node = self.get_node_by_id(second_id) # The one who will be killed
+
+        #Fusion of inputs & outputs
+        for id in second_node.get_input_ids():
+            first_node.add_input_id(id)
+        for id in second_node.get_output_ids():
+            first_node.add_output_id(id)
+
+        #The user can set his own label to the fusion
+        if label:
+            frst_node.set_label((str)label)
+
+        # GO TO HELL WE DON'T NEED YOU ANYMORE
+        self.remove_node_by_id(second_id)
+
+
+
+
+
+
+
+
 
 class bool_circ(open_digraph):
-    def __init__(self, g):
+    def __init__(self, *args):
         '''
         **TYPE** boolean
-        g: open_digraph
+        g: open_digraph or string
         returns True if the graph g is a boolean circuit, and creates the instance
         '''
-        self.inputs = g.get_input_ids()
-        self.outputs = g.get_output_ids()
-        self.nodes = g.get_id_node_map()
-        # We check that the boolean circuit is well formed, to know if we can actually create it
+
+        g = args[0]
+        # If g is a string, we create it by parsing
+        if isinstance(g, str):
+            # Question 4
+            if (len(args) > 1):
+                self = bool_circ(args.pop(0))
+                self.iparallel(bool_circ(args[0]).to_graph())
+            else:
+                self = super().__init__([], [], [node(0, '', [], [])])
+                current_node = 0
+                s2 = ""
+                for char in g:
+                    if (char == '('):
+
+                        node = self.get_node_by_id(current_node)
+                        node.set_label(node.get_label() + s2)
+                        id = self.add_node()
+                        node.add_parent_id(id)
+                        current_node = id
+                        s2 = ""
+                    elif (char == ')'):
+                        node = self.get_node_by_id(current_node)
+                        node.set_label(node.get_label() + s2)
+                        # Question 3
+                        same_node = self.get_node_by_label(s2) #We check if there is already a node with the same name
+                        if same_node is not None: #If yes, we melt them
+                            self.node_fusion(node, same_node.get_id())
+
+                        current_node = node.get_children_ids()[0].get_id()
+                        s2 = ""
+                    else:
+                        s2 += char
+
+        else:
+            self.inputs = g.get_input_ids()
+            self.outputs = g.get_output_ids()
+            self.nodes = g.get_id_node_map()
+            # We check that the boolean circuit is well formed, to know if we can actually create it
         if not self.is_well_formed():
             print("Attention votre circuit n'est pas bien formé : ", g)
 
