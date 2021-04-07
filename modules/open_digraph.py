@@ -44,7 +44,7 @@ class node:
         # parents : [2, 3, 4]
         # children : [5, 6]
         # will return  node(0, d, [2, 3, 4], [5, 6])
-        return "node"+str(self)
+        return "node" + str(self)
 
     def copy(self):
         '''
@@ -56,11 +56,9 @@ class node:
                     self.get_parent_ids().copy(),
                     self.get_children_ids().copy())
 
-    '''
-    GETTERS
-    functions to get the attributes of the object
-    (encapsulation)
-    '''
+    # ----- GETTERS -----
+    # functions to get the attributes of the object
+    # (encapsulation)
     def get_id(self):
         return self.id
 
@@ -73,11 +71,9 @@ class node:
     def get_children_ids(self):
         return self.children
 
-    '''
-    SETTERS
-    functions to modify the attributes of the object
-    (encapsulation)
-    '''
+    # ----- SETTERS -----
+    # functions to modify the attributes of the object
+    # (encapsulation)
     def set_id(self, new_id):
         self.id = new_id
 
@@ -169,12 +165,28 @@ class open_digraph:  # for open directed graph
         self.outputs = outputs
         # self.nodes: <int,node> dict
         self.nodes = {node.id: node for node in nodes}
-        for inp in inputs:
-            if inp in self.nodes:
-                self.get_node_by_id(inp).fromworld += 1
-        for outp in outputs:
-            if outp in self.nodes:
-                self.get_node_by_id(outp).toworld += 1
+        self.compute_indegrees()
+        self.compute_outdegrees()
+
+    def compute_indegrees(self):
+        # This part is useful to calculate the indegree of nodes
+        # First, we reset all values
+        for node in self.nodes:
+            self.nodes[node].fromworld = 0
+        # Then we calculate new ones
+        for input in self.inputs:  # The graph should be well formed
+            if input in self.get_node_ids():
+                self.nodes[input].fromworld += 1
+
+    def compute_outdegrees(self):
+        # This part is useful to calculate the indegree of nodes
+        # First, we reset all values
+        for node in self.nodes:
+            self.nodes[node].toworld = 0
+        # Then we calculate new ones
+        for output in self.outputs:  # The graph should be well formed
+            if output in self.get_node_ids():
+                self.nodes[output].toworld += 1
 
     def __str__(self):
         '''
@@ -189,17 +201,24 @@ class open_digraph:  # for open directed graph
         **EXAMPLE**
         open_digraph([0,1], [2], [node(4, 'i', [0, 2], [3])])
         '''
-        return "open_digraph"+str(self)
+        return "open_digraph" + str(self)
 
     def __eq__(self, g):
         '''
         **TYPE** boolean
         return self == g
         '''
-        inp = (self.inputs == g.inputs)
-        out = (self.outputs == g.outputs)
-        node = (self.nodes == g.nodes)
-        return inp and out and node
+        # We check that inputs are equals
+        if not (self.inputs == g.inputs):
+            return False
+        # We check that outputs are equals
+        if not (self.outputs == g.outputs):
+            return False
+        # We check that nodes are equals
+        if not (self.nodes == g.nodes):
+            return False
+        # If they're all equals, then the graphs are equals
+        return True
 
     def empty():
         '''
@@ -214,16 +233,13 @@ class open_digraph:  # for open directed graph
         **TYPE** open_digraph
         function that returns a copy of the object
         '''
-        nodelist = [i.copy() for i in self.get_nodes()]
         return open_digraph(self.get_input_ids().copy(),
                             self.get_output_ids().copy(),
-                            nodelist)
+                            [i.copy() for i in self.get_nodes()])
 
-    '''
-    GETTERS
-    functions to get the attributes of the object
-    (encapsulation)
-    '''
+    # ----- GETTERS -----
+    # functions to get the attributes of the object
+    # (encapsulation)
     def get_input_ids(self):
         return self.inputs
 
@@ -249,6 +265,10 @@ class open_digraph:  # for open directed graph
         return len(self.nodes)
 
     def multi_getter(self, args):
+        '''
+        This functions is a shortcut if you want to
+        find either parents, children or both
+        '''
         result = []
         if "parents" in args:
             result += self.get_nodes_by_ids(
@@ -259,32 +279,27 @@ class open_digraph:  # for open directed graph
                       (self.get_node_by_id(u)).get_children_ids()
                       )
         return result
-    '''
-    SETTERS
-    functions to modify the attributes of the object
-    (encapsulation)
-    '''
+
+    # ----- SETTERS -----
+    # functions to modify the attributes of the object
+    # (encapsulation)
     def set_input_ids(self, new_idlist):
         self.inputs = new_idlist
-        for inp in new_idlist:
-            if inp in self.get_nodes():
-                self.get_node_by_id(inp).fromworld += 1
+        # New computation of the nodes' indegree
+        self.compute_indegrees()
 
     def set_output_ids(self, new_idlist):
         self.outputs = new_idlist
-        for outp in new_idlist:
-            if outp in self.get_nodes():
-                self.get_node_by_id(outp).toworld += 1
+        # New computation of the nodes' outdegree
+        self.compute_outdegrees()
 
     def add_input_id(self, new_id):
         self.inputs.append(new_id)
-        if id in self.get_nodes():
-            self.get_node_by_id(id).fromworld += 1
+        self.compute_indegrees()
 
     def add_output_id(self, new_id):
         self.outputs.append(new_id)
-        if id in self.get_nodes():
-            self.get_node_by_id(id).toworld += 1
+        self.compute_outdegrees()
 
     def new_id(self):
         '''
@@ -292,7 +307,7 @@ class open_digraph:  # for open directed graph
         function that returns an unused id for an edge
         '''
         id = 0
-        while(self.nodes.get(id, None) is not None):
+        while(id in self.get_node_ids()):
             id += 1
         return id
 
@@ -323,9 +338,11 @@ class open_digraph:  # for open directed graph
         parents: int list; parents' ids of the node to add
         children: int list; children's ids of the node to add
         '''
+        # This should return an Id that is not in the graph
         id = self.new_id()
-        thisnode = node(id, label, [], [])
-        self.nodes[thisnode.id] = thisnode
+        # Note : parents & children will be added after
+        thisNode = node(id, label, [], [])
+        self.nodes[id] = thisNode
         for parent in parents:
             self.add_edge(parent, id)
         for child in children:
@@ -348,10 +365,13 @@ class open_digraph:  # for open directed graph
         id: int; id of the node to remove
         remove the node with the id
         '''
-        for parent in self.get_node_by_id(id).get_parent_ids():
-            self.get_node_by_id(parent).remove_child_id_all(id)
-        for child in self.get_node_by_id(id).get_children_ids():
-            self.get_node_by_id(child).remove_parent_id_all(id)
+        node = self.get_node_by_id(id)
+        for parent in node.get_parent_ids():
+            parent_node = self.get_node_by_id(parent)
+            parent_node.remove_child_id_all(id)
+        for child in node.get_children_ids():
+            child_node = self.get_node_by_id(child)
+            child_node.remove_parent_id_all(id)
         self.nodes.pop(id)
 
     def remove_edges(self, src_list, tgt_list):
@@ -393,24 +413,24 @@ class open_digraph:  # for open directed graph
             if nodes_ids[node_id].get_id() != node_id:
                 return False
 
-            sons = nodes_ids[node_id].get_children_ids()
-            parents = nodes_ids[node_id].get_parent_ids()
-            for child in sons:  # Checking sons are coherent
-                n = count_occurence(sons, child)
-                if (count_occurence(nodes_ids[child].get_parent_ids(),
+            children_ids = nodes_ids[node_id].get_children_ids()
+            parents_ids = nodes_ids[node_id].get_parent_ids()
+            for child_id in children_ids:  # Checking sons are coherent
+                n = count_occurence(children_ids, child_id)
+                if (count_occurence(nodes_ids[child_id].get_parent_ids(),
                                     nodes_ids[node_id].get_id()) != n):
                     return False
-            for parent in parents:  # Checking that parents are coherent
-                n = count_occurence(parents, parent)
+            for parent in parents_ids:  # Checking that parents are coherent
+                n = count_occurence(parents_ids, parent)
                 if (count_occurence(nodes_ids[parent].get_children_ids(),
                                     nodes_ids[node_id].get_id()) != n):
                     return False
 
-        for inp in self.get_input_ids():  # Checking inputs are in nodes
-            if inp not in nodes_ids:
+        for input in self.get_input_ids():  # Checking inputs are in nodes
+            if input not in nodes_ids:
                 return False
-        for outp in self.get_output_ids():  # Checking outputs are in nodes
-            if outp not in nodes_ids:
+        for output in self.get_output_ids():  # Checking outputs are in nodes
+            if output not in nodes_ids:
                 return False
         return True
 
@@ -421,16 +441,20 @@ class open_digraph:  # for open directed graph
         node_id: int; actual id of the node
         change node_id by new_id
         '''
-        if not (new_id in self.get_node_ids() or node_id == new_id):
+        if (new_id not in self.get_node_ids()):
             node_map = self.get_id_node_map()
-            node_map[new_id] = node_map.pop(node_id)
-            for node in self.get_nodes():
-                if node_id in node.get_parent_ids():
-                    node.remove_parent_id(node_id)
-                    node.add_parent_id(new_id)
-                if node_id in node.get_children_ids():
-                    node.remove_child_id(node_id)
-                    node.add_child_id(new_id)
+            node = node_map.pop(node_id)
+            # Our node map should have the node with another id
+            node_map[new_id] = node
+            # We change the id
+            node.set_id(new_id)
+
+            for child in node.get_children_ids():
+                self.get_node_by_id(child).remove_parent_id(node_id)
+                node.remove_child_id(child)
+            for parent in node.get_parent_ids():
+                self.get_node_by_id(parent).remove_child_id(node_id)
+                node.remove_parent_id(parent)
 
     def change_ids(self, new_ids, node_ids):
         '''
@@ -501,14 +525,14 @@ class open_digraph:  # for open directed graph
         cyclic means that there is a path from a node to itself
         '''
 
-        g = self.copy()  # We make a copy to avoid removing nodes to the graph
+        graph = self.copy()  # We make a copy to avoid removing nodes to the graph
 
-        def sub_is_cyclic(g):
+        def sub_is_cyclic(graph):
             # If there is no node in the graph, it is acyclic by definition
-            if not g.get_nodes():
+            if not graph.get_nodes():
                 return False
             else:
-                for node in g.get_nodes():
+                for node in graph.get_nodes():
                     # We check if the node is a leaf (i.e. no children)
                     if not node.get_children_ids():
                         leaf = node.get_id()
@@ -516,13 +540,13 @@ class open_digraph:  # for open directed graph
                         # and that this child graph is cyclic,
                         # it means that the original graph is cyclic,
                         # and this is the same for acyclic graphs
-                        g.remove_node_by_id(leaf)
-                        return sub_is_cyclic(g)
+                        graph.remove_node_by_id(leaf)
+                        return sub_is_cyclic(graph)
                 # If there are nodes BUT not any leaf,
                 # it means that the graph is a cycle
                 return True
 
-        return sub_is_cyclic(g)
+        return sub_is_cyclic(graph)
 
     def min_id(self):
         return min(self.get_node_ids())
@@ -644,7 +668,7 @@ class open_digraph:  # for open directed graph
                     result[nodeA_parent] = (self.dijsktra(nodeA,
                                                           tgt=nodeA_parent)[0],
                                             self.dijsktra(nodeB,
-                                                           tgt=nodeB_parent)[0])
+                                                          tgt=nodeB_parent)[0])
         return result
 
     def topological_sorting(self):
@@ -703,10 +727,11 @@ class open_digraph:  # for open directed graph
         if self.is_cyclic():
             raise ValueError("The graph isn't acyclic")
         else:
-            l = self.topological_sorting()
-            k = self.node_depth(u)
-            for i in range(k+1, len(l)):  # For depths of more than k
-                for w in l[i]:
+            sorted_list = self.topological_sorting()
+            depth = self.node_depth(u)
+            # For depths of more than k
+            for i in range(depth+1, len(sorted_list)):
+                for w in sorted_list[i]:
                     # If w node is different to v node
                     if w.get_id() != v.get_id():
                         for parent in w.get_parent_ids():
