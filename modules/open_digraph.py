@@ -30,9 +30,7 @@ class node:
         # children : [5, 6]
         # will return (0, d, [2, 3, 4], [5, 6])
         return ("(" + str(self.id) + ", " + self.label + ", " +
-                str(self.parents) + ", " + str(self.children) +
-                ") toworld = " + str(self.toworld) +
-                " fromworld = " + str(self.fromworld))
+                str(self.parents) + ", " + str(self.children) + ")")
 
     def __repr__(self):
         '''
@@ -264,7 +262,7 @@ class open_digraph:  # for open directed graph
     def get_length(self):
         return len(self.nodes)
 
-    def multi_getter(self, args):
+    def multi_getter(self, id, args):
         '''
         This functions is a shortcut if you want to
         find either parents, children or both
@@ -272,11 +270,11 @@ class open_digraph:  # for open directed graph
         result = []
         if "parents" in args:
             result += self.get_nodes_by_ids(
-                      (self.get_node_by_id(u)).get_parent_ids()
+                      (self.get_node_by_id(id)).get_parent_ids()
                       )
         if "children" in args:
             result += self.get_nodes_by_ids(
-                      (self.get_node_by_id(u)).get_children_ids()
+                      (self.get_node_by_id(id)).get_children_ids()
                       )
         return result
 
@@ -572,15 +570,15 @@ class open_digraph:  # for open directed graph
         return self.copy().iparallel(g, in_perm, out_perm)
 
     def icompose(self, g):
-        inputs = self.get_input_ids()
-        outputs = g.get_output_ids()
+        inputs = g.get_input_ids()
+        outputs = self.get_output_ids()
         if not len(inputs) == len(outputs):
             raise ValueError
         else:
             # if the lists 'inputs' and 'outputs' have values in common
             if(bool(set(inputs).intersection(outputs))):
                 self.shift_indices(g.max_id() - self.min_id() + 1)
-            for i in range(lenself):
+            for i in range(len(inputs)):
                 self.add_edge(inputs[i], outputs[i])
 
     def compose(self, g):
@@ -625,14 +623,15 @@ class open_digraph:  # for open directed graph
         prev = {}
 
         while queue:
-            u = self.get_id(min(Q, key=lambda x: dist[x]))
+            u = queue[0]
+            #u = self.get_id(min(Q, key=lambda x: dist[x]))
             queue.remove(u)
             switcher = {
                 1: "parents",
                 -1: "children",
                 None: ["parents", "children"]
             }
-            neighbours = self.multi_getter(switcher.get(direction,
+            neighbours = self.multi_getter(u.get_id(), switcher.get(direction,
                                            "Invalid direction value"))
             for v in neighbours:
                 if v not in dist:
@@ -665,9 +664,9 @@ class open_digraph:  # for open directed graph
         for nodeA_parent in nodeA.get_parent_ids():
             for nodeB_parent in nodeB.get_parent_ids():
                 if nodeA_parent == nodeB_parent:
-                    result[nodeA_parent] = (self.dijsktra(nodeA,
+                    result[nodeA_parent] = (self.dijkstra(nodeA,
                                                           tgt=nodeA_parent)[0],
-                                            self.dijsktra(nodeB,
+                                            self.dijkstra(nodeB,
                                                           tgt=nodeB_parent)[0])
         return result
 
@@ -786,7 +785,7 @@ class open_digraph:  # for open directed graph
 
 
 class bool_circ(open_digraph):
-    def __init__(self, *args):
+    def __init__(self, check=True, *args):
         '''
         **TYPE** boolean
         g: open_digraph or string
@@ -820,12 +819,11 @@ class bool_circ(open_digraph):
                         s2 = ""
                     else:
                         s2 += char
-                # PASSAGE A REECRIRE : PAS PROPRE
                 # Question 3
                 for node in graph:
+                    graph.remove_all(node)
                     for second_node in graph:
-                        if (node.get_label() == second_node.get_label() and
-                                node != second_node):
+                        if (node.get_label() == second_node.get_label()):
                             self.node_fusion(node.get_id(),
                                              second_node.get_id())
                 for node in graph:
@@ -838,7 +836,7 @@ class bool_circ(open_digraph):
         self.nodes = g.get_id_node_map()
         # We check that the boolean circuit is well formed,
         # to know if we can actually create it
-        if not self.is_well_formed():
+        if (check and not self.is_well_formed()):
             print("Attention votre circuit n'est pas bien formé : ", g)
 
     def to_graph(self):
@@ -848,8 +846,7 @@ class bool_circ(open_digraph):
         '''
         return open_digraph(self.get_input_ids(),
                             self.get_output_ids(),
-                            self.get_nodes(),
-                            new=False)
+                            self.get_nodes())
 
     def is_well_formed(self):
         '''
