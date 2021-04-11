@@ -289,7 +289,7 @@ class GraphTest(unittest.TestCase):
         g,h = self.exemples_de_graphe()
         self.assertEqual(g.max_id(),4)
         self.assertEqual(h.max_id(),8)
-    def test_shift_indices(self, n):
+    def test_shift_indices(self):
         g,h = self.exemples_de_graphe()
         g.shift_indices(3)
         self.assertEqual(g.min_id(),3)
@@ -310,21 +310,21 @@ class GraphTest(unittest.TestCase):
     def test_icompose(self):
         g,h = self.exemples_de_graphe()
         h.icompose(g)
-        assertEqual(h.get_input_ids(), [5,5,6])
-        assertEqual(h.get_output_ids(), [1,4])
-        assertEqual(h.get_node_by_id(5).get_children_ids(), [0,6])
-        assertEqual(h.get_node_by_id(7).get_children_ids(), [2])
-        assertEqual(h.get_node_by_id(0).get_parents_ids(), [5])
-        assertEqual(h.get_node_by_id(2).get_parents_ids(), [7])
+        self.assertEqual(h.get_input_ids(), [5,5,6])
+        self.assertEqual(h.get_output_ids(), [1,4])
+        self.assertEqual(h.get_node_by_id(5).get_children_ids(), [0,6])
+        self.assertEqual(h.get_node_by_id(7).get_children_ids(), [2])
+        self.assertEqual(h.get_node_by_id(0).get_parents_ids(), [5])
+        self.assertEqual(h.get_node_by_id(2).get_parents_ids(), [7])
     def test_compose(self):
         g,h = self.exemples_de_graphe()
-        h.icompose(g)
-        assertEqual(test.get_input_ids(), [5,5,6])
-        assertEqual(test.get_output_ids(), [1,4])
-        assertEqual(test.get_node_by_id(5).get_children_ids(), [0,6])
-        assertEqual(test.get_node_by_id(7).get_children_ids(), [2])
-        assertEqual(test.get_node_by_id(0).get_parents_ids(), [5])
-        assertEqual(test.get_node_by_id(2).get_parents_ids(), [7])
+        test = h.compose(g)
+        self.assertEqual(test.get_input_ids(), [5,5,6])
+        self.assertEqual(test.get_output_ids(), [1,4])
+        self.assertEqual(test.get_node_by_id(5).get_children_ids(), [0,6])
+        self.assertEqual(test.get_node_by_id(7).get_children_ids(), [2])
+        self.assertEqual(test.get_node_by_id(0).get_parents_ids(), [5])
+        self.assertEqual(test.get_node_by_id(2).get_parents_ids(), [7])
     def test_connected_components(self):
         pass
     def test_graph_permutation(self):
@@ -345,14 +345,17 @@ class GraphTest(unittest.TestCase):
         node7 = odgraph.node(7,'7',[3,5],[])
         node8 = odgraph.node(8,'8',[1,6],[])
         node9 = odgraph.node(9,'9',[6],[])
-        nodelist = [node1,node2,node3,node4,node5,node6,node7,node8,node9]
+        nodelist = [node0,node1,node2,node3,node4,node5,node6,node7,node8,node9]
         g = odgraph.open_digraph([0,2], [7], nodelist)
         return g
 
     def test_shortest_path(self):
         g = self.exemple_td8()
-        self.assertEqual(g.shortest_path(g.get_node_by_id(0),g.get_node_by_id(3)),[g.get_node_by_id(0),g.get_node_by_id(3)])
-        self.assertEqual(g.shortest_path(g.get_node_by_id(0),g.get_node_by_id(7)),[g.get_node_by_id(0),g.get_node_by_id(3),g.get_node_by_id(7)])
+        n0 = g.get_node_by_id(0)
+        n3 = g.get_node_by_id(3)
+        n7 = g.get_node_by_id(7)
+        self.assertEqual(g.shortest_path(n0,n3),[n0,n3])
+        self.assertEqual(g.shortest_path(n0,n7),[n0,n3,n7])
 
     def test_parents_distance(self):
         g = self.exemple_td8()

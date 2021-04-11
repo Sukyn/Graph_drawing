@@ -432,7 +432,7 @@ class open_digraph:  # for open directed graph
                 return False
         return True
 
-    def change_id(self, new_id, node_id):
+    def change_id(self, node_id, new_id):
         '''
         **TYPE** void
         new_id: int; new id of the node
@@ -449,10 +449,11 @@ class open_digraph:  # for open directed graph
 
             for child in node.get_children_ids():
                 self.get_node_by_id(child).remove_parent_id(node_id)
-                node.remove_child_id(child)
+                self.get_node_by_id(child).add_parent_id(new_id)
+
             for parent in node.get_parent_ids():
                 self.get_node_by_id(parent).remove_child_id(node_id)
-                node.remove_parent_id(parent)
+                self.get_node_by_id(parent).add_child_id(new_id)
 
     def change_ids(self, new_ids, node_ids):
         '''
@@ -472,7 +473,7 @@ class open_digraph:  # for open directed graph
         '''
         normalized_list = [i for i in range(self.get_length())]
         old_ids = self.get_node_ids()
-        self.change_ids(normalized_list, old_ids)
+        self.change_ids(old_ids, normalized_list)
 
     def adjacency_matrix(self):
         '''
@@ -553,21 +554,27 @@ class open_digraph:  # for open directed graph
         return max(self.get_node_ids())
 
     def shift_indices(self, n):
-        new_ids = [(ids + n) for ids in self.get_nodes_by_ids()]
-        self.change_ids(new_ids, self.get_nodes_by_ids())
+        new_ids = [(ids + n) for ids in self.get_node_ids()]
+        self.change_ids(self.get_node_ids(), new_ids)
 
     def iparallel(self, g, in_perm=None, out_perm=None):
         for inp in g.get_input_ids():
             self.add_input_id(inp)
         for outp in g.get_output_ids():
             self.add_output_id(outp)
+        '''
         if self.max_id() > g.min_id():
-            g = g.copy().shift_indices(self.max_id() - g.min_id() + 1)
+            g.shift_indices(self.max_id() - g.min_id() + 1)
+        '''
         for node in g.get_nodes():
+            if node.get_id() in self.get_node_ids():
+                node.change_id(self.new_id())
             self.get_id_node_map()[node.get_id()] = node
 
-    def parallel(self, g, in_perm, out_perm):
-        return self.copy().iparallel(g, in_perm, out_perm)
+    def parallel(self, g, in_perm=None, out_perm=None):
+        result = self.copy()
+        result.iparallel(g, in_perm, out_perm)
+        return result
 
     def icompose(self, g):
         inputs = g.get_input_ids()
@@ -575,14 +582,22 @@ class open_digraph:  # for open directed graph
         if not len(inputs) == len(outputs):
             raise ValueError
         else:
+
+            self.iparallel(g)
             # if the lists 'inputs' and 'outputs' have values in common
+            '''
             if(bool(set(inputs).intersection(outputs))):
                 self.shift_indices(g.max_id() - self.min_id() + 1)
+            '''
             for i in range(len(inputs)):
-                self.add_edge(inputs[i], outputs[i])
+                self.add_edge(outputs[i], inputs[i])
+
+
 
     def compose(self, g):
-        return self.copy().icompose(g)
+        result = self.copy()
+        result.icompose(g)
+        return result
 
     def connected_components(self):
         components = {}
@@ -653,10 +668,11 @@ class open_digraph:  # for open directed graph
         while node != nodeA:
             node = previous[node]
             path.insert(0, node)
-
+        '''
         if distance != len(path):
             print("La taille n'est pas bonne")
             return None
+        '''
         return path
 
     def parents_distance(self, nodeA, nodeB):
