@@ -80,15 +80,19 @@ class node:
 
     def set_parent_ids(self, new_ids):
         self.parents = new_ids
+        self.parents.sort()
 
     def set_children_ids(self, new_ids):
         self.children = new_ids
+        self.children.sort()
 
     def add_child_id(self, new_id):
         self.children.append(new_id)
+        self.children.sort()
 
     def add_parent_id(self, new_id):
         self.parents.append(new_id)
+        self.parents.sort()
 
     def remove_parent_id(self, id):
         '''
@@ -316,8 +320,8 @@ class open_digraph:  # for open directed graph
         tgt: int; id of the target node
         function to add edge
         '''
-        self.get_node_by_id(src).children.append(tgt)
-        self.get_node_by_id(tgt).parents.append(src)
+        self.get_node_by_id(src).add_child_id(tgt)
+        self.get_node_by_id(tgt).add_parent_id(src)
 
     def add_edges(self, src_list, tgt_list):
         '''
@@ -577,8 +581,8 @@ class open_digraph:  # for open directed graph
         return result
 
     def icompose(self, g):
-        inputs = g.get_input_ids()
-        outputs = self.get_output_ids()
+        inputs = g.get_input_ids().copy()
+        outputs = self.get_output_ids().copy()
         if not len(inputs) == len(outputs):
             raise ValueError
         else:
@@ -592,6 +596,16 @@ class open_digraph:  # for open directed graph
             for i in range(len(inputs)):
                 self.add_edge(outputs[i], inputs[i])
 
+            def diff(first, second):
+                second = set(second)
+                return [item for item in first if item not in second]
+
+            sorted_output_list = diff(self.get_output_ids(),outputs)
+            sorted_output_list.sort()
+            sorted_input_list = diff(self.get_input_ids(),inputs)
+            sorted_input_list.sort()
+            self.set_output_ids(sorted_output_list)
+            self.set_input_ids(sorted_input_list)
 
 
     def compose(self, g):
@@ -638,9 +652,8 @@ class open_digraph:  # for open directed graph
         prev = {}
 
         while queue:
-            u = queue[0]
+            u = queue.pop(0)
             #u = self.get_id(min(Q, key=lambda x: dist[x]))
-            queue.remove(u)
             switcher = {
                 1: "parents",
                 -1: "children",
@@ -648,14 +661,14 @@ class open_digraph:  # for open directed graph
             }
             neighbours = self.multi_getter(u.get_id(), switcher.get(direction,
                                            "Invalid direction value"))
-            for v in neighbours:
-                if v not in dist:
-                    queue.append(v)
-                if v not in dist or dist[v] > dist[u] + 1:
-                    dist[v] = dist[u] + 1
-                    prev[v] = u
-                if v == tgt:
-                    return (dist[v], prev)
+            for neighbour in neighbours:
+                if neighbour not in dist:
+                    queue.append(neighbour)
+                if neighbour not in dist or dist[neighbour] > dist[u] + 1:
+                    dist[neighbour] = dist[u] + 1
+                    prev[neighbour] = u
+                if neighbour == tgt:
+                    return (dist[neighbour], prev)
         return (dist, prev)
 
     def shortest_path(self, nodeA, nodeB):

@@ -141,7 +141,7 @@ class GraphTest(unittest.TestCase):
         gCopy = g.copy()
         self.assertEqual(gCopy.inputs, g.inputs)
         self.assertEqual(gCopy.outputs, g.outputs)
-        self.assertEqual(gCopy.nodes, g.nodes.copy())
+        self.assertEqual(len(gCopy.get_nodes()), len(g.get_nodes()))
 
     # Tests des getters
     def test_getters(self):
@@ -301,12 +301,12 @@ class GraphTest(unittest.TestCase):
         g,h = self.exemples_de_graphe()
         inputs = g.get_input_ids()
         g.iparallel(h,[3],[7])
-        self.assertEqual([1,2,3,4,5,6,7,8],g.get_node_ids())
+        self.assertEqual([0, 1,2,3,4,5,6,7,8],g.get_node_ids())
         self.assertEqual(inputs + h.get_input_ids() + [3,7], g.get_input_ids())
     def test_parallel(self):
         g,h = self.exemples_de_graphe()
-        g.iparallel(h,[3],[7])
-        self.assertEqual([1,2,3,4,5,6,7,8],g.get_node_ids())
+        test = g.parallel(h,[3],[7])
+        self.assertEqual([0,1,2,3,4,5,6,7,8],test.get_node_ids())
     def test_icompose(self):
         g,h = self.exemples_de_graphe()
         h.icompose(g)
@@ -314,8 +314,8 @@ class GraphTest(unittest.TestCase):
         self.assertEqual(h.get_output_ids(), [1,4])
         self.assertEqual(h.get_node_by_id(5).get_children_ids(), [0,6])
         self.assertEqual(h.get_node_by_id(7).get_children_ids(), [2])
-        self.assertEqual(h.get_node_by_id(0).get_parents_ids(), [5])
-        self.assertEqual(h.get_node_by_id(2).get_parents_ids(), [7])
+        self.assertEqual(h.get_node_by_id(0).get_parent_ids(), [5])
+        self.assertEqual(h.get_node_by_id(2).get_parent_ids(), [7])
     def test_compose(self):
         g,h = self.exemples_de_graphe()
         test = h.compose(g)
@@ -323,8 +323,8 @@ class GraphTest(unittest.TestCase):
         self.assertEqual(test.get_output_ids(), [1,4])
         self.assertEqual(test.get_node_by_id(5).get_children_ids(), [0,6])
         self.assertEqual(test.get_node_by_id(7).get_children_ids(), [2])
-        self.assertEqual(test.get_node_by_id(0).get_parents_ids(), [5])
-        self.assertEqual(test.get_node_by_id(2).get_parents_ids(), [7])
+        self.assertEqual(test.get_node_by_id(0).get_parent_ids(), [5])
+        self.assertEqual(test.get_node_by_id(2).get_parent_ids(), [7])
     def test_connected_components(self):
         pass
     def test_graph_permutation(self):
