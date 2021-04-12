@@ -358,8 +358,8 @@ class open_digraph:  # for open directed graph
         tgt : int; id of the target node
         function to remove edge
         '''
-        self.get_node_by_id(src).remove_child_id(tgt)
-        self.get_node_by_id(tgt).remove_parent_id(src)
+        self.get_node_by_id(src).children.remove(tgt)
+        self.get_node_by_id(tgt).parents.remove(src)
 
     def remove_node_by_id(self, id):
         '''
@@ -459,16 +459,17 @@ class open_digraph:  # for open directed graph
                 self.get_node_by_id(parent).remove_child_id(node_id)
                 self.get_node_by_id(parent).add_child_id(new_id)
 
-    def change_ids(self, new_ids, node_ids):
+    def change_ids(self, node_ids, new_ids):
         '''
         **TYPE** void
         new_ids: int list; new ids of the nodes
         node_ids: int list; actual ids of the nodes
         change all of the node_ids by new_ids
         '''
-        list = sorted(zip(new_ids, node_ids), key=lambda x: x[0])
+        list = sorted(zip(node_ids, new_ids), key=lambda x: x[0])
         for i in range(len(list)):
             self.change_id(list[i][0], list[i][1])
+
 
     def normalize_ids(self):
         '''
@@ -477,6 +478,7 @@ class open_digraph:  # for open directed graph
         '''
         normalized_list = [i for i in range(self.get_length())]
         old_ids = self.get_node_ids()
+
         self.change_ids(old_ids, normalized_list)
 
     def adjacency_matrix(self):
@@ -485,7 +487,9 @@ class open_digraph:  # for open directed graph
         return the adjacency_matrix of the graph
         '''
         n = self.get_length()
+
         self.normalize_ids()
+
         return [[count_occurence(self.get_node_by_id(i).get_parent_ids(), j)
                 for i in range(n)] for j in range(n)]
 
@@ -559,7 +563,13 @@ class open_digraph:  # for open directed graph
 
     def shift_indices(self, n):
         new_ids = [(ids + n) for ids in self.get_node_ids()]
-        self.change_ids(self.get_node_ids(), new_ids)
+        list = sorted(zip(self.get_node_ids(), new_ids), key=lambda x: x[0])
+        if (n < 0):
+            for i in range(len(list)):
+                self.change_id(list[i][0], list[i][1])
+        else:
+            for i in range(len(list)-1, -1, -1):
+                self.change_id(list[i][0], list[i][1])
 
     def iparallel(self, g, in_perm=None, out_perm=None):
         for inp in g.get_input_ids():
