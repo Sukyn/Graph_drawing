@@ -358,8 +358,8 @@ class open_digraph:  # for open directed graph
         tgt : int; id of the target node
         function to remove edge
         '''
-        self.get_node_by_id(src).children.remove(tgt)
-        self.get_node_by_id(tgt).parents.remove(src)
+        self.get_node_by_id(src).remove_child_id(tgt)
+        self.get_node_by_id(tgt).remove_parent_id(src)
 
     def remove_node_by_id(self, id):
         '''
