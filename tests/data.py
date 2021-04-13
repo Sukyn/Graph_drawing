@@ -1,7 +1,6 @@
 import sys
-from modules.utils import *
 sys.path.append('../')
-
+from modules.utils import *
 
 def boolean_graph():
     '''
@@ -143,3 +142,11 @@ def composed_graph():
     nodelist = [node1,node2,node3,node4,node5,node6,node7,node8,node9,node10,node11]
     super_graph = odgraph.open_digraph([1,3],[2,3],nodelist)
     return super_graph
+
+def exemples_de_node():
+    '''
+    on renvoie un couple de node exemples pour faire les tests
+    '''
+    node1 = odgraph.node(0, "Isabelle", [], [1, 2, 7, 3, 5, 2, 2])
+    node2 = odgraph.node(1, "Adjani", [4, 4], [7, 5, 5, 8])
+    return (node1, node2)

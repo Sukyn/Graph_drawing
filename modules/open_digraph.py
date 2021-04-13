@@ -1,7 +1,6 @@
 import sys
-from modules.utils import *
 sys.path.append('../')
-
+import modules.utils as utils
 
 class node:
     def __init__(self, identity, label, parents, children):
@@ -122,7 +121,7 @@ class node:
         id: int; id of the parents
         remove all of the parents with the id
         '''
-        remove_all(self.parents, id)
+        utils.remove_all(self.parents, id)
 
     def remove_child_id_all(self, id):
         '''
@@ -130,7 +129,7 @@ class node:
         id: int; id of the children
         remove all of the children with the id
         '''
-        remove_all(self.children, id)
+        utils.remove_all(self.children, id)
 
     def indegree(self):
         '''
@@ -418,13 +417,13 @@ class open_digraph:  # for open directed graph
             children_ids = nodes_ids[node_id].get_children_ids()
             parents_ids = nodes_ids[node_id].get_parent_ids()
             for child_id in children_ids:  # Checking sons are coherent
-                n = count_occurence(children_ids, child_id)
-                if (count_occurence(nodes_ids[child_id].get_parent_ids(),
+                n = utils.count_occurence(children_ids, child_id)
+                if (utils.count_occurence(nodes_ids[child_id].get_parent_ids(),
                                     nodes_ids[node_id].get_id()) != n):
                     return False
             for parent in parents_ids:  # Checking that parents are coherent
-                n = count_occurence(parents_ids, parent)
-                if (count_occurence(nodes_ids[parent].get_children_ids(),
+                n = utils.count_occurence(parents_ids, parent)
+                if (utils.count_occurence(nodes_ids[parent].get_children_ids(),
                                     nodes_ids[node_id].get_id()) != n):
                     return False
 
@@ -490,7 +489,8 @@ class open_digraph:  # for open directed graph
 
         self.normalize_ids()
 
-        return [[count_occurence(self.get_node_by_id(i).get_parent_ids(), j)
+        return [[utils.count_occurence(self.get_node_by_id(i).get_parent_ids(),
+                                       j)
                 for i in range(n)] for j in range(n)]
 
     def max_indegree(self):
@@ -885,7 +885,7 @@ class bool_circ(open_digraph):
                 input_labels = []
                 # Question 3
                 for node in graph:
-                    graph.remove_all(node)
+                    utils.remove_all(graph, node)
                     for second_node in graph:
                         if (node.get_label() == second_node.get_label()):
                             self.node_fusion(node.get_id(),
