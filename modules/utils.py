@@ -52,7 +52,7 @@ def graph_from_adjacency_matrix(matrix):
 
 
 
-def random_graph(n, bound, inputs=0, outputs=0, form="free"):
+def random_graph(n, bound, inputs=[], outputs=[], form="free"):
     '''
     pour form on a differentes options :
         "free": un graphe quelconque

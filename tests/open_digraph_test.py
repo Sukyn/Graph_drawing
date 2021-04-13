@@ -453,5 +453,10 @@ class BoolCircTest(unittest.TestCase):
         b3 = odgraph.bool_circ(g3) # On a bien un message d'erreur
         b4 = odgraph.bool_circ(g4) # On a bien un message d'erreur
 
+
+    '''Test TD10'''
+    def test_random_bool_circ(self):
+        pass
+
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run

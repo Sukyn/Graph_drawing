@@ -629,16 +629,22 @@ class open_digraph:  # for open directed graph
         id_connexe = 0
 
         while g.get_node_ids():
+            # take a node
             nodes_list = [g.min_id()]
             while nodes_list:
+                # remove the node with collecting the id
                 node_id = nodes_list.pop(0)
                 if not node_id in components:
+                    #note the id
                     components[node_id] = id_connexe
                     node = g.get_node_by_id(node_id)
                     parents = node.get_parent_ids()
                     children = node.get_children_ids()
+                    #remove the id
                     g.remove_node_by_id(node_id)
+                    #taking the parents and the children
                     nodes_list += parents + children
+            #change connexe
             id_connexe += 1
         return (id_connexe, components)
 
@@ -875,6 +881,8 @@ class bool_circ(open_digraph):
                         s2 = ""
                     else:
                         s2 += char
+                # Question 4
+                input_labels = []
                 # Question 3
                 for node in graph:
                     graph.remove_all(node)
@@ -882,6 +890,8 @@ class bool_circ(open_digraph):
                         if (node.get_label() == second_node.get_label()):
                             self.node_fusion(node.get_id(),
                                              second_node.get_id())
+                            # we note the label
+                            input_labels.append(node.get_label)
                 for node in graph:
                     node.set_label("")
 
@@ -905,37 +915,110 @@ class bool_circ(open_digraph):
                             self.get_nodes())
 
     def is_well_formed(self):
-        '''
-        **TYPE** boolean
-        That fonction tests if the bool_circ is well formed.
-        i.e. if he is acyclic and respects th degrees constraints
 
-        We could have nodes with the '0' or the '1' value to
-        represent the 0 and 1 constants
-
-        A well formed bool_circ :
-        - has all of his copy nodes with one input
-        - has all of his AND and OR gates with one output
-        - has all of his NOT gate with one input and one output
-        - is not cyclic
-        '''
         for node in self.get_nodes():
             label = node.get_label()
             if (label == "&"):
                 if (node.outdegree() != 1):
                     return False
-            if (label == "|"):
+            elif (label == "|"):
                 if (node.outdegree() != 1):
                     return False
-            if (label == "~"):
+            elif (label == "~"):
                 if (node.indegree() != 1 or node.outdegree() != 1):
                     return False
-            if (label == ""):
+            elif (label == ""):
                 if (node.indegree() != 1):
                     return False
             else:
-                return False
+                if (node.outdegree() != 1 or node.indegree() != 1):
+                    return False
         if self.is_cyclic():
             return False
 
         return True
+
+    def random_bool_circ(self, n, inputs, outputs):
+        '''
+        **TYPE** bool_circ
+        That function returns a random bool_circ with
+        a number n of nodes
+        a number input of inputs
+        and a number output of outputs
+        '''
+        # create a random graph et take the informations
+        graph = random_graph(n, 1, form = "DAG")
+        input_list = []
+        output_list = []
+        node_list = graph.get_nodes()
+        node_id_list = graph.get_node_ids()
+
+        # for each node without parent, put an input
+        for node in graph.get_nodes():
+            if not node.get_parent_ids():
+                input_list.append(node.get_id())
+        # for each node without child, put an output
+            if not node.get_children_ids():
+                output_list.append(node.get_id())
+        # create a list of potential node input
+        possible_node_input = graph.get_node_ids()
+        for input in input_list:
+            possible_node_input.remove(input)
+        # create inputs
+        while len(input_list) < inputs:
+            choice = random.choice(possible_node_input)
+            possible_node_input.remove(choice)
+            input_list.append(choice)
+        #delete inputs
+        while len(input_list) > inputs:
+            choice1 = random.choice(input_list)
+            input_list.remove(choice1)
+            choice2 = random.choice(input_list)
+            input_list.remove(choice2)
+
+            new_id = max(node_id_list) +1
+            new_node = node(new_id, '', [], [choice1, choice2])
+            node_list.append(new_node)
+            node_id_list.append(new_id)
+            input_list.append(new_id)
+        # create a list of potential node output
+        possible_node_output = graph.get_node_ids()
+        for output in output_list:
+            possible_node_output.remove(output)
+        # create outputs
+        while len(output_list) < outputs:
+            choice = random.choice(possible_node_output)
+            possible_node_output.remove(choice)
+            output_list.append(choice)
+        # delete outputs
+        while len(output_list) > outputs:
+            choice1 = random.choice(output_list)
+            output_list.remove(choice1)
+            choice2 = random.choice(output_list)
+            output_list.remove(choice2)
+
+            new_id = max(node_id_list) +1
+            new_node = node(new_id, '', [choice1, choice2], [])
+            node_list.append(new_node)
+            node_id_list.append(new_id)
+            output_list.append(new_id)
+
+        #set the labels
+        for node in node_list:
+            if node.indegree() == 1 and node.outdegree() == 1:
+                node.set_label("~")
+            elif node.indegree() == 1 and node.outdegree() > 1:
+                pass
+            elif node.indegree() > 1 and node.outdegree() == 1:
+                node.set_label(str(random.randrange(1)))
+            elif node.indegree() > 1 and node.outdegree() > 1:
+                #create an intermediar node
+                new_id = max(node_id_list) +1
+                new_node = node(new_id, random.choice(["&", "|"]), [node.get_id()], node.get_parent_ids())
+                node_id_list.append(new_id)
+                node.set_parent_ids([new_id])
+                node_list.append(new_node)
+            else:
+                "{y'a un problème ça va pas du tout}.traduct('english')"
+
+        return bool_circ(open_digraph(input_list, output_list, node_list))
