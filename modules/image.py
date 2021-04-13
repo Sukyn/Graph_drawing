@@ -142,6 +142,11 @@ def drawgraph(self, g, method='manual', node_pos=None, input_pos=None, output_po
         node_pos = circle[0]
         input_pos = circle[1]
         output_pos = circle[2]
+    elif(method == 'topological_sorting'):
+        DAG = DAG_layout(g)
+        node_pos = DAG[0]
+        input_pos = DAG[1]
+        output_pos = DAG[2]
 
     for input in range(len(input_pos)):
         self.arrows(input_pos[input], node_pos[g.get_input_ids()[input]])
@@ -216,6 +221,24 @@ def slope_angle(p1,p2):
         coeff_direct = (p1.y - p2.y)/(p1.x - p2.x) #leading coefficient calculation
         return math.atan(coeff_direct)
 
+'''TD10'''
+def DAG_layout(graph):
+    '''
+    **TYPE**: point list * point list * point list
+    function that returns positions for nodes in a topologically sorted graph
+    '''
+    dag = graph.topological_sorting();
+    dag.insert(0,graph.get_input_ids())
+    dag.append(graph.get_output_ids())
+
+    for i in range(len(dag)):
+        if len(dag[i])%2!=0:
+            node_pos[dag[i][(len(dag[i])+1)/2]] = point(width/2,20*i+10)
+            for j in range(((len(dag[i])-1)/2)+1):
+                node_pos[dag[i][((len(dag[i])+1)/2)-j]] = point(width/2+20*(j+1),20*i+10)
+                node_pos[dag[i][((len(dag[i])+1)/2)+j]] = point(width/2+20*(j+1),20*i+10)
+
+    return (node_pos, input_pos, output_pos)
 
 image = Image.new("RGB", (width, height), 'white')
 draw = ImageDraw.Draw(image)

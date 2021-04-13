@@ -630,15 +630,17 @@ class open_digraph:  # for open directed graph
 
         while g.get_node_ids():
             nodes_list = [g.min_id()]
-            for nodes_id in nodes_list:
-                components[nodes_id] = id_connexe
-                nodes = g.get_node_by_ids(nodes_id)
-                parents = [n.get_parent_ids() for n in nodes]
-                children = [n.get_children_ids() for n in nodes]
-                g.remove_node_by_id(nodes_id)
-                nodes_list += parents + children
+            while nodes_list:
+                node_id = nodes_list.pop(0)
+                if not node_id in components:
+                    components[node_id] = id_connexe
+                    node = g.get_node_by_id(node_id)
+                    parents = node.get_parent_ids()
+                    children = node.get_children_ids()
+                    g.remove_node_by_id(node_id)
+                    nodes_list += parents + children
             id_connexe += 1
-        return (id_connexe + 1, components)
+        return (id_connexe, components)
 
     def graph_permutation(self):
         nb, compo_id = self.connected_components()
@@ -662,33 +664,35 @@ class open_digraph:  # for open directed graph
         prev = {}
 
         while queue:
-            u = queue.pop(0)
-            #u = self.get_id(min(Q, key=lambda x: dist[x]))
-            switcher = {
-                1: "parents",
-                -1: "children",
-                None: ["parents", "children"]
-            }
-            neighbours = self.multi_getter(u.get_id(), switcher.get(direction,
-                                           "Invalid direction value"))
+
+            u = min(queue, key=lambda x: dist[x])
+            queue.remove(u)
+            if (direction == 1):
+                neighbours = self.get_nodes_by_ids((self.get_node_by_id(u)).get_parent_ids())
+            elif (direction == -1):
+                neighbours = self.get_nodes_by_ids((self.get_node_by_id(u)).get_children_ids())
+            else:
+                neighbours = self.get_nodes_by_ids((self.get_node_by_id(u)).get_children_ids()) + self.get_nodes_by_ids((self.get_node_by_id(u)).get_parent_ids())
+
             for neighbour in neighbours:
-                if neighbour not in dist:
-                    queue.append(neighbour)
-                if neighbour not in dist or dist[neighbour] > dist[u] + 1:
-                    dist[neighbour] = dist[u] + 1
-                    prev[neighbour] = u
-                if neighbour == tgt:
-                    return (dist[neighbour], prev)
+                if neighbour.get_id() not in dist:
+                    queue.append(neighbour.get_id())
+                if neighbour.get_id() not in dist or dist[neighbour.get_id()] > dist[u] + 1:
+                    dist[neighbour.get_id()] = dist[u] + 1
+                    prev[neighbour.get_id()] = u
+                if neighbour.get_id() == tgt:
+                    return (dist[neighbour.get_id()], prev)
         return (dist, prev)
 
     def shortest_path(self, nodeA, nodeB):
         if nodeB not in self.get_nodes():
             print("nodeB not in the graph")
             return None
-        distance, previous = self.dijkstra(nodeA, tgt=nodeB)
-        path = [nodeB]
-        node = nodeB
-        while node != nodeA:
+
+        distance, previous = self.dijkstra(nodeA.get_id(), tgt=nodeB.get_id())
+        path = [nodeB.get_id()]
+        node = nodeB.get_id()
+        while node != nodeA.get_id():
             node = previous[node]
             path.insert(0, node)
         '''
@@ -698,15 +702,22 @@ class open_digraph:  # for open directed graph
         '''
         return path
 
+    def every_parents(self, node):
+        result = node.get_parent_ids().copy()
+        for parent in result:
+            value = self.every_parents(self.get_node_by_id(parent))
+            if value not in result:
+                result += value
+        return result
+
     def parents_distance(self, nodeA, nodeB):
         result = {}
-        for nodeA_parent in nodeA.get_parent_ids():
-            for nodeB_parent in nodeB.get_parent_ids():
+        for nodeA_parent in self.every_parents(nodeA):
+            for nodeB_parent in self.every_parents(nodeB):
                 if nodeA_parent == nodeB_parent:
-                    result[nodeA_parent] = (self.dijkstra(nodeA,
-                                                          tgt=nodeA_parent)[0],
-                                            self.dijkstra(nodeB,
-                                                          tgt=nodeB_parent)[0])
+                    distA = self.dijkstra(nodeA.get_id(), tgt=nodeA_parent)[0]
+                    distB = self.dijkstra(nodeB.get_id(), tgt=nodeB_parent)[0]
+                    result[nodeA_parent] = (distA, distB)
         return result
 
     def topological_sorting(self):
@@ -732,8 +743,10 @@ class open_digraph:  # for open directed graph
             # We get this list of leaves in our sorting table,
             # then we remove these leaves from the graph
             sorting.append(leaves)
-            leaves = []
             g.remove_nodes_by_id(leaves)
+            leaves = []
+
+        sorting.sort(key=lambda x: x[0])
         return sorting
 
     def node_depth(self, node):
@@ -759,7 +772,7 @@ class open_digraph:  # for open directed graph
         return len(self.topological_sorting())
 
     def longest_path(self, u, v):
-        dist = {u: 0}
+        dist = {u.get_id(): 0}
         prev = {}
 
         if self.is_cyclic():
@@ -767,25 +780,27 @@ class open_digraph:  # for open directed graph
         else:
             sorted_list = self.topological_sorting()
             depth = self.node_depth(u)
+
             # For depths of more than k
-            for i in range(depth+1, len(sorted_list)):
+            for i in range(depth, len(sorted_list)):
+
                 for w in sorted_list[i]:
-                    # If w node is different to v node
-                    if w.get_id() != v.get_id():
-                        for parent in w.get_parent_ids():
-                            # If one of the parents of
-                            # node w is in the dist dictionary
-                            if parent in dist:
-                                # We take the parent of dist maximum
-                                parent_max = max(dict, key=dict.get)
-                                # We give the value of parent_max to dist[w]
-                                dist[w] = dist[parent] + 1
-                                # We save the parent_max node in prev[w]
-                                prev[w] = parent_max
-        path = [v]
-        node = v
-        while node != u:
-            node = previous[node]
+                    for parent in self.get_node_by_id(w).get_parent_ids():
+                        # If one of the parents of
+                        # node w is in the dist dictionary
+
+                        if parent in dist:
+                            # We take the parent of dist maximum
+                            parent_max = max(dist, key=lambda x: dist[x])
+                            # We give the value of parent_max to dist[w]
+                            dist[w] = dist[parent] + 1
+                            # We save the parent_max node in prev[w]
+                            prev[w] = parent_max
+
+        path = [v.get_id()]
+        node = v.get_id()
+        while node != u.get_id():
+            node = prev[node]
             path.insert(0, node)
         return path, len(path)
 
@@ -823,8 +838,10 @@ class open_digraph:  # for open directed graph
         self.remove_node_by_id(second_id)
 
 
+
+
 class bool_circ(open_digraph):
-    def __init__(self, check=True, *args):
+    def __init__(self, *args, check=True):
         '''
         **TYPE** boolean
         g: open_digraph or string
