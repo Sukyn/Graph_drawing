@@ -254,7 +254,7 @@ class open_digraph:  # for open directed graph
         return list(self.nodes.values())
 
     def get_node_ids(self):
-        return [i for i in self.nodes]
+        return sorted([i for i in self.nodes])
 
     def get_node_by_id(self, id):
         return self.nodes[id]
@@ -766,7 +766,7 @@ class open_digraph:  # for open directed graph
         '''
         for i, x in enumerate(self.topological_sorting()):
             if node.get_id() in x:
-                return i
+                return i+1
 
     def graph_depth(self):
         '''
