@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 import modules.utils as utils
+import random
 
 class node:
     def __init__(self, identity, label, parents, children):
@@ -223,7 +224,7 @@ class open_digraph:  # for open directed graph
 
     def empty():
         '''
-        **TYPE** void
+        **TYPE** open digraph
         constructor of an empty graph
         no inputs, no outputs, no nodes
         '''
@@ -334,7 +335,7 @@ class open_digraph:  # for open directed graph
 
     def add_node(self, label='', parents=[], children=[]):
         '''
-        **TYPE** void
+        **TYPE** int
         label: string; label of the node to add
         parents: int list; parents' ids of the node to add
         children: int list; children's ids of the node to add
@@ -921,6 +922,12 @@ class bool_circ(open_digraph):
             if (label == "&"):
                 if (node.outdegree() != 1):
                     return False
+            elif (label == "^"):
+                if (node.outdegree() != 1):
+                    return False
+            elif (label == "0" or label == "1"):
+                if (node.indegree() > 0):
+                    return False
             elif (label == "|"):
                 if (node.outdegree() != 1):
                     return False
@@ -938,7 +945,7 @@ class bool_circ(open_digraph):
 
         return True
 
-    def random_bool_circ(self, n, inputs, outputs):
+    def random_bool_circ(n, inputs, outputs):
         '''
         **TYPE** bool_circ
         That function returns a random bool_circ with
@@ -947,19 +954,19 @@ class bool_circ(open_digraph):
         and a number output of outputs
         '''
         # create a random graph et take the informations
-        graph = random_graph(n, 1, form = "DAG")
+        graph = utils.random_graph(n, 1, form = "DAG")
         input_list = []
         output_list = []
         node_list = graph.get_nodes()
         node_id_list = graph.get_node_ids()
 
         # for each node without parent, put an input
-        for node in graph.get_nodes():
-            if not node.get_parent_ids():
-                input_list.append(node.get_id())
+        for nodeB in graph.get_nodes():
+            if not nodeB.get_parent_ids():
+                input_list.append(nodeB.get_id())
         # for each node without child, put an output
-            if not node.get_children_ids():
-                output_list.append(node.get_id())
+            if not nodeB.get_children_ids():
+                output_list.append(nodeB.get_id())
         # create a list of potential node input
         possible_node_input = graph.get_node_ids()
         for input in input_list:
@@ -977,6 +984,7 @@ class bool_circ(open_digraph):
             input_list.remove(choice2)
 
             new_id = max(node_id_list) +1
+            print(new_id, choice1, choice2)
             new_node = node(new_id, '', [], [choice1, choice2])
             node_list.append(new_node)
             node_id_list.append(new_id)
@@ -1022,3 +1030,11 @@ class bool_circ(open_digraph):
                 "{y'a un problème ça va pas du tout}.traduct('english')"
 
         return bool_circ(open_digraph(input_list, output_list, node_list))
+
+    def registre(n):
+        binary_form = bin(n)[2:]
+        circ = bool_circ.empty()
+        for char in binary_form:
+            id = circ.add_node(label=char)
+            circ.add_output_id(id)
+        return circ

@@ -180,7 +180,8 @@ def random_layout(graph):
 def circle_layout(graph):
     '''
     **TYPE**: point list * point list * point list
-    function that returns positions for nodes in a graph such that these positions are uniformly distributed on a circle around the center of the image
+    function that returns positions for nodes in a graph such that these
+    positions are uniformly distributed on a circle around the center of the image
     '''
     node_ids = graph.get_node_ids() #node ids list
     nbr_node = len(node_ids) #number of node
@@ -194,19 +195,49 @@ def circle_layout(graph):
     input_pos = []
     output_pos = []
     for i in graph.get_input_ids() :
-        pos_x = node_pos[node_ids[i]].n()[0]
-        pos_y = node_pos[node_ids[i]].n()[1]
+        pos_x = node_pos[i].n()[0]
+        pos_y = node_pos[i].n()[1]
         dot = point(pos_x, pos_y+50)
-        (x, y) = dot.rotate(random.randrange(360), c=node_pos[node_ids[i]])
+        (x, y) = dot.rotate(random.randrange(360), c=node_pos[i])
         input_pos.append(point(x, y))     #position of input
     for i in graph.get_output_ids() :
-        pos_x = node_pos[node_ids[i]].n()[0]
-        pos_y = node_pos[node_ids[i]].n()[1]
+        pos_x = node_pos[i].n()[0]
+        pos_y = node_pos[i].n()[1]
         dot = point(pos_x, pos_y+50)
-        (x, y) = dot.rotate(random.randrange(360), c=node_pos[node_ids[i]])
+        (x, y) = dot.rotate(random.randrange(360), c=node_pos[i])
         output_pos.append(point(x, y))     #position of output
     return (node_pos, input_pos, output_pos)
 
+
+def DAG_layout(graph):
+    '''
+    **TYPE**: point list * point list * point list
+    function that returns positions for nodes in a graph such that these
+    positions are distributed on layers
+'''
+
+    node_pos = {}
+    sorted_nodes = graph.topological_sorting()
+    nbr_layers = len(sorted_nodes)
+
+    for i in range(nbr_layers):
+        for id, node in enumerate(sorted_nodes[i]):
+            node_pos[node] = point((id+1)*200/len(sorted_nodes[i]),
+                                   (i+1)*200/len(sorted_nodes))
+
+    input_pos = []
+    output_pos = []
+    for i in graph.get_input_ids() :
+        pos_x = node_pos[i].n()[0]
+        pos_y = node_pos[i].n()[1]
+        dot = point(pos_x, pos_y-50)
+        input_pos.append(dot)     #position of input
+    for i in graph.get_output_ids() :
+        pos_x = node_pos[i].n()[0]
+        pos_y = node_pos[i].n()[1]
+        dot = point(pos_x, pos_y+50)
+        output_pos.append(dot)     #position of output
+    return (node_pos, input_pos, output_pos)
 
 def slope_angle(p1,p2):
     '''
@@ -222,11 +253,13 @@ def slope_angle(p1,p2):
         return math.atan(coeff_direct)
 
 '''TD10'''
+
+'''
 def DAG_layout(graph):
-    '''
+
     **TYPE**: point list * point list * point list
     function that returns positions for nodes in a topologically sorted graph
-    '''
+
     dag = graph.topological_sorting();
     dag.insert(0,graph.get_input_ids())
     dag.append(graph.get_output_ids())
@@ -239,6 +272,7 @@ def DAG_layout(graph):
                 node_pos[dag[i][((len(dag[i])+1)/2)+j]] = point(width/2+20*(j+1),20*i+10)
 
     return (node_pos, input_pos, output_pos)
+'''
 
 image = Image.new("RGB", (width, height), 'white')
 draw = ImageDraw.Draw(image)
@@ -253,7 +287,7 @@ g = odgraph.open_digraph([1], [2], n0list)
 #draw.graph(g,'random')
 #draw.graph(g,'circle',{0:point(50,20),1:point(130,70),2:point(300,250)},[point(2,2)], [point(400,400)])
 pasOrigine = point(33,200)
-draw.arrows(pasOrigine,centre, 4, 1)
-#draw.drawnode(node, pasOrigine,True)
+#draw.arrows(pasOrigine,centre, 4, 1)
+draw.drawnode(node, pasOrigine,True)
 
 image.save("test.jpg")

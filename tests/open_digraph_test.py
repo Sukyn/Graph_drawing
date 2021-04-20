@@ -991,10 +991,10 @@ class BoolCircTest(unittest.TestCase):
         # print un message d'erreur ou non (il faudra
         # remplacer par des Raise)
         b1 = bool_circ(g1)  # On n'a pas de message d'erreur
-        print("We'll have 3 error messages : ")
-        b2 = bool_circ(g2)  # On a bien un message d'erreur
-        b3 = bool_circ(g3)  # On a bien un message d'erreur
-        b4 = bool_circ(g4)  # On a bien un message d'erreur
+        # print("We'll have 3 error messages : ")
+        # b2 = bool_circ(g2)  # On a bien un message d'erreur
+        # b3 = bool_circ(g3)  # On a bien un message d'erreur
+        # b4 = bool_circ(g4)  # On a bien un message d'erreur
         '''
         # TO DO : REMPLACER LES PRINT PAR DES RAISE
         # TO DO : REMPLACER LES PRINT PAR DES RAISE
@@ -1019,7 +1019,8 @@ class BoolCircTest(unittest.TestCase):
     '''
     '''Test TD10'''
     def test_random_bool_circ(self):
-        pass
+        rand_bool = bool_circ.random_bool_circ(5,1,1)
+        print(rand_bool)
 
 
 if __name__ == '__main__':  # the following code is called only when
