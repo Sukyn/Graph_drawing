@@ -64,7 +64,7 @@ def random_graph(n, bound, inputs=[], outputs=[], form="free"):
     if (form == "free"):
         graphe = graph_from_adjacency_matrix( random_matrix(n, bound) )
     elif (form == "DAG"):
-        graphe = graph_from_adjacency_matrix( random_matrix(n, bound, triangular = True) )
+        graphe = graph_from_adjacency_matrix( random_matrix(n, bound, triangular = True, null_diag = True) )
     elif (form == "oriented"):
         graphe = graph_from_adjacency_matrix( random_matrix(n, bound, oriented = True) )
     elif (form == "undirected"):

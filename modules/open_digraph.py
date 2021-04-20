@@ -953,83 +953,95 @@ class bool_circ(open_digraph):
         a number input of inputs
         and a number output of outputs
         '''
-        # create a random graph et take the informations
+        # create a random graph
         graph = utils.random_graph(n, 1, form = "DAG")
-        input_list = []
-        output_list = []
-        node_list = graph.get_nodes()
-        node_id_list = graph.get_node_ids()
 
-        # for each node without parent, put an input
-        for nodeB in graph.get_nodes():
-            if not nodeB.get_parent_ids():
-                input_list.append(nodeB.get_id())
-        # for each node without child, put an output
-            if not nodeB.get_children_ids():
-                output_list.append(nodeB.get_id())
+        # to have indegree and maxdegree > 0
+        for node_anonymous in graph.get_nodes():
+            #reset the label
+            node_anonymous.set_label("")
+            # make node input if it has no parent
+            if not node_anonymous.get_parent_ids():
+                graph.add_input_id(node_anonymous.get_id())
+            #make node output if it has no child
+            if not node_anonymous.get_children_ids():
+                graph.add_output_id(node_anonymous.get_id())
+
         # create a list of potential node input
         possible_node_input = graph.get_node_ids()
-        for input in input_list:
+        for input in graph.get_input_ids():
             possible_node_input.remove(input)
-        # create inputs
-        while len(input_list) < inputs:
+
+
+        # we want to have the good number of input
+        while len(graph.get_input_ids()) < inputs:
+            #take a random non-input node
             choice = random.choice(possible_node_input)
             possible_node_input.remove(choice)
-            input_list.append(choice)
-        #delete inputs
-        while len(input_list) > inputs:
-            choice1 = random.choice(input_list)
-            input_list.remove(choice1)
-            choice2 = random.choice(input_list)
-            input_list.remove(choice2)
+            #create the input
+            graph.add_input_id(choice)
 
-            new_id = max(node_id_list) +1
-            print(new_id, choice1, choice2)
-            new_node = node(new_id, '', [], [choice1, choice2])
-            node_list.append(new_node)
-            node_id_list.append(new_id)
-            input_list.append(new_id)
+        while len(graph.get_input_ids()) > inputs:
+            #take 2 input nodes and remove them from the inputs
+            choice1 = random.choice(graph.get_input_ids())
+            graph.del_input_id(choice1)
+            choice2 = random.choice(graph.get_input_ids())
+            graph.del_input_id(choice2)
+
+            #create a new node which is parent of the 2 choices
+            new_node_id = graph.add_node("", [], [choice1, choice2])
+            #add the input
+            graph.add_input_id(new_node_id)
+
         # create a list of potential node output
         possible_node_output = graph.get_node_ids()
-        for output in output_list:
+        for output in graph.get_output_ids():
             possible_node_output.remove(output)
-        # create outputs
-        while len(output_list) < outputs:
+
+        # we want to have the good number of output
+        while len(graph.get_output_ids()) < outputs:
+            #take a random non-output node
             choice = random.choice(possible_node_output)
             possible_node_output.remove(choice)
-            output_list.append(choice)
-        # delete outputs
-        while len(output_list) > outputs:
-            choice1 = random.choice(output_list)
-            output_list.remove(choice1)
-            choice2 = random.choice(output_list)
-            output_list.remove(choice2)
+            #create the output
+            graph.add_output_id(choice)
 
-            new_id = max(node_id_list) +1
-            new_node = node(new_id, '', [choice1, choice2], [])
-            node_list.append(new_node)
-            node_id_list.append(new_id)
-            output_list.append(new_id)
+        while len(graph.get_output_ids()) > outputs:
+            #take 2 output nodes and remove them from the outputs
+            choice1 = random.choice(graph.get_output_ids())
+            graph.del_output_id(choice1)
+            choice2 = random.choice(graph.get_output_ids())
+            graph.del_output_id(choice2)
 
-        #set the labels
-        for node in node_list:
-            if node.indegree() == 1 and node.outdegree() == 1:
-                node.set_label("~")
-            elif node.indegree() == 1 and node.outdegree() > 1:
+            #create a new node which is parent of the 2 choices
+            new_node_id = graph.add_node("", [choice1, choice2], [])
+            #add the input
+            graph.add_output_id(new_node_id)
+
+        # we will change all of the labels
+        for node_anonymous in graph.get_nodes():
+            if node_anonymous.indegree() == 1 and node_anonymous.outdegree() == 1:
+                #we make a not node
+                node_anonymous.set_label("~")
+            elif node_anonymous.indegree() == 1 and node_anonymous.outdegree() > 1:
+                #we make a copy node
                 pass
-            elif node.indegree() > 1 and node.outdegree() == 1:
-                node.set_label(str(random.randrange(1)))
-            elif node.indegree() > 1 and node.outdegree() > 1:
+            elif node_anonymous.indegree() > 1 and node_anonymous.outdegree() == 1:
+                #we make a or or and node
+                node_anonymous.set_label(random.choice(["&","|"]))
+            elif node_anonymous.indegree() > 1 and node_anonymous.outdegree() > 1:
                 #create an intermediar node
-                new_id = max(node_id_list) +1
-                new_node = node(new_id, random.choice(["&", "|"]), [node.get_id()], node.get_parent_ids())
-                node_id_list.append(new_id)
-                node.set_parent_ids([new_id])
-                node_list.append(new_node)
+                new_node_id = graph.add_node( random.choice(["&", "|"]), node_anonymous.get_parent_ids(), [node_anonymous.get_id()])
+
+                #transform the input if we have to
+                if node_anonymous.get_id() in graph.get_input_ids():
+                    graph.del_input_id(node_anonymous.get_id())
+                    graph.add_input_id(new_node_id)
+
             else:
                 "{y'a un problème ça va pas du tout}.traduct('english')"
 
-        return bool_circ(open_digraph(input_list, output_list, node_list))
+        return bool_circ(graph)
 
     def registre(n):
         binary_form = bin(n)[2:]
