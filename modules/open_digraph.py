@@ -1050,3 +1050,130 @@ class bool_circ(open_digraph):
             id = circ.add_node(label=char)
             circ.add_output_id(id)
         return circ
+
+    def apply_copy_rule(self, data_node_id, cp_node_id):
+        data = self.get_node_by_id(data_node_id).get_label()
+        assert data in ['0', '1'], "wrong data label"
+        assert self.get_node_by_id(data_node_id).get_children_ids()==[cp_node_id], "the two nodes are not connected"
+        return_nodes=[]
+        # case where the copy node is also an output
+        for ind in range(len(self.get_output_ids())):
+            if self.get_output_ids()[ind] == cp_node_id:
+                new_id = self.add_node(data, [], [])
+                self.outputs[ind] = new_id
+                return_nodes.append(new_id)
+        # general case
+        children = self.get_node_by_id(cp_node_id).get_children_ids()
+        for child in children:
+            new_id = self.add_node(data, [], [child])
+            return_nodes.append(new_id)
+        self.remove_nodes_by_id([data_node_id, cp_node_id])
+        assert(self.is_well_formed())
+        return return_nodes
+
+    def apply_not_rule(self, data_node_id, not_node_id):
+        data = self.get_node_by_id(data_node_id).get_label()
+        assert data in ['0', '1'], "wrong data label"
+        assert self.get_node_by_id(data_node_id).get_children_ids()==[not_node_id], "the two nodes are not connected"
+        return_nodes=[]
+        # case where the not node is also an output
+        for ind in range(len(self.get_output_ids())):
+            if self.get_output_ids()[ind] == not_node_id:
+                new_id = self.add_node(data, [], [])
+                self.outputs[ind] = new_id
+                return_nodes.append(new_id)
+        # general case
+        if data == '0:'
+            self.get_node_by_id(not_node_id).set_label('1')
+        else:
+            self.get_node_by_id(not_node_id).set_label('0')
+        self.remove_node_by_id(data_node_id)
+        assert(self.is_well_formed())
+        return return_nodes
+
+    def apply_and_rule(self, data_node_id, and_node_id):
+        data = self.get_node_by_id(data_node_id).get_label()
+        assert data in ['0', '1'], "wrong data label"
+        assert self.get_node_by_id(data_node_id).get_children_ids()==[and_node_id], "the two nodes are not connected"
+
+        if (data == "1"):
+            return [and_node_id]
+
+        return_nodes=[]
+        # case where the copy node is also an output
+        for ind in range(len(self.get_output_ids())):
+            if self.get_output_ids()[ind] == and_node_id:
+                new_id = self.add_node(data, [], [])
+                self.outputs[ind] = new_id
+                return_nodes.append(new_id)
+        # general case
+        parents = self.get_node_by_id(and_node_id).get_parent_ids()
+        for parent in parents:
+            new_id = self.add_node('', [parent], [])
+            return_nodes.append(new_id)
+        self.get_node_by_id(and_node_id).set_label('0')
+        self.remove_node_by_id(data_node_id)
+        assert(self.is_well_formed())
+        return return_nodes
+
+    def apply_and_rule(self, data_node_id, or_node_id):
+        data = self.get_node_by_id(data_node_id).get_label()
+        assert data in ['0', '1'], "wrong data label"
+        assert self.get_node_by_id(data_node_id).get_children_ids()==[or_node_id], "the two nodes are not connected"
+
+        if (data == "0"):
+            return [or_node_id]
+
+        return_nodes=[]
+        # case where the copy node is also an output
+        for ind in range(len(self.get_output_ids())):
+            if self.get_output_ids()[ind] == or_node_id:
+                new_id = self.add_node(data, [], [])
+                self.outputs[ind] = new_id
+                return_nodes.append(new_id)
+        # general case
+        parents = self.get_node_by_id(or_node_id).get_parent_ids()
+        for parent in parents:
+            new_id = self.add_node('', [parent], [])
+            return_nodes.append(new_id)
+        self.get_node_by_id(or_node_id).set_label('0')
+        self.remove_node_by_id(data_node_id)
+        assert(self.is_well_formed())
+        return return_nodes
+
+    def apply_xor_rule(self, data_node_id, xor_node_id):
+        data = self.get_node_by_id(data_node_id).get_label()
+        assert data in ['0', '1'], "wrong data label"
+        assert self.get_node_by_id(data_node_id).get_children_ids()==[xor_node_id], "the two nodes are not connected"
+
+        if (data == "0"):
+            return [xor_node_id]
+
+        return_nodes=[]
+        # case where the copy node is also an output
+        for ind in range(len(self.get_output_ids())):
+            if self.get_output_ids()[ind] == xor_node_id:
+                new_id = self.add_node(data, [], [])
+                self.outputs[ind] = new_id
+                return_nodes.append(new_id)
+        # general case
+        new_id = self.add_node('~', [xor_node_id], [])
+        return_nodes.append(new_id)
+        return_nodes.append(xor_node_id)
+        self.remove_node_by_id(data_node_id)
+        assert(self.is_well_formed())
+        return return_nodes
+
+    def apply_neutral_rule(self, neutral_node_id):
+        data = self.get_node_by_id(neutral_node_id).get_label()
+        assert data in ['|', '^', '&'], "wrong data label"
+        if (data == "|" or data == "^"):
+            new_id = self.add_node("0", [], self.get_node_by_id(neutral_node_id).get_children_ids())
+            self.remove_node_by_id(neutral_node_id)
+            return [new_id]
+        elif (data == "&"):
+            new_id = self.add_node("1", [], self.get_node_by_id(neutral_node_id).get_children_ids())
+            self.remove_node_by_id(neutral_node_id)
+            return [new_id]
+
+    #def reduce_eval(self):
