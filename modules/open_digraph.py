@@ -303,6 +303,14 @@ class open_digraph:  # for open directed graph
         self.outputs.append(new_id)
         self.compute_outdegrees()
 
+    def del_input_id(self, old_id):
+        self.inputs.remove(old_id)
+        self.compute_indegrees()
+
+    def del_output_id(self, old_id):
+        self.outputs.remove(old_id)
+        self.compute_outdegrees()
+
     def new_id(self):
         '''
         **TYPE** void
