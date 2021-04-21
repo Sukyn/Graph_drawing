@@ -1019,8 +1019,25 @@ class BoolCircTest(unittest.TestCase):
     '''
     '''Test TD10'''
     def test_random_bool_circ(self):
-        rand_bool = bool_circ.random_bool_circ(5,1,1)
-        print(rand_bool)
+        #creation of 5 random bool_circ
+        rand_bool1 = bool_circ.random_bool_circ(5 , 1, 1)
+        rand_bool2 = bool_circ.random_bool_circ(20, 4, 9)
+        rand_bool3 = bool_circ.random_bool_circ(3 , 1, 2)
+        rand_bool4 = bool_circ.random_bool_circ(10, 3, 2)
+        rand_bool5 = bool_circ.random_bool_circ(10, 3, 2)
+
+        #on vérifie qu'il y a le bon nombre d'input et de output
+        #pour vérifier si le graph est bien formé on regarde s'il y a un message d'erreur
+        self.assertEqual(len(rand_bool1.get_input_ids() ), 1)
+        self.assertEqual(len(rand_bool1.get_output_ids()), 1)
+        self.assertEqual(len(rand_bool2.get_input_ids() ), 4)
+        self.assertEqual(len(rand_bool2.get_output_ids()), 9)
+        self.assertEqual(len(rand_bool3.get_input_ids() ), 1)
+        self.assertEqual(len(rand_bool3.get_output_ids()), 2)
+        self.assertEqual(len(rand_bool4.get_input_ids() ), 3)
+        self.assertEqual(len(rand_bool4.get_output_ids()), 2)
+        self.assertEqual(len(rand_bool5.get_input_ids() ), 3)
+        self.assertEqual(len(rand_bool5.get_output_ids()), 2)
 
 
 if __name__ == '__main__':  # the following code is called only when

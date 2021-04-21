@@ -953,7 +953,7 @@ class bool_circ(open_digraph):
 
         return True
 
-    def random_bool_circ(n, inputs, outputs):
+    def random_bool_circ(node_number, inputs, outputs):
         '''
         **TYPE** bool_circ
         That function returns a random bool_circ with
@@ -962,15 +962,15 @@ class bool_circ(open_digraph):
         and a number output of outputs
         '''
         # create a random graph
-        graph = utils.random_graph(n, 1, form = "DAG")
-
+        graph = utils.random_graph(node_number, 1, [], [], "DAG")
         # to have indegree and maxdegree > 0
         for node_anonymous in graph.get_nodes():
             #reset the label
             node_anonymous.set_label("")
             # make node input if it has no parent
             if not node_anonymous.get_parent_ids():
-                graph.add_input_id(node_anonymous.get_id())
+                if not node_anonymous.get_id() in graph.get_input_ids():
+                    graph.add_input_id(node_anonymous.get_id())
             #make node output if it has no child
             if not node_anonymous.get_children_ids():
                 graph.add_output_id(node_anonymous.get_id())
@@ -979,7 +979,6 @@ class bool_circ(open_digraph):
         possible_node_input = graph.get_node_ids()
         for input in graph.get_input_ids():
             possible_node_input.remove(input)
-
 
         # we want to have the good number of input
         while len(graph.get_input_ids()) < inputs:
@@ -1038,9 +1037,13 @@ class bool_circ(open_digraph):
                 #we make a or or and node
                 node_anonymous.set_label(random.choice(["&","|"]))
             elif node_anonymous.indegree() > 1 and node_anonymous.outdegree() > 1:
+                #take the parents of the node
+                nodeParents = node_anonymous.get_parent_ids().copy()
                 #create an intermediar node
                 new_node_id = graph.add_node( random.choice(["&", "|"]), node_anonymous.get_parent_ids(), [node_anonymous.get_id()])
-
+                #remove the parents from the node parents
+                for parentId in nodeParents:
+                    graph.remove_edge(parentId, node_anonymous.get_id())
                 #transform the input if we have to
                 if node_anonymous.get_id() in graph.get_input_ids():
                     graph.del_input_id(node_anonymous.get_id())
@@ -1091,7 +1094,7 @@ class bool_circ(open_digraph):
                 self.outputs[ind] = new_id
                 return_nodes.append(new_id)
         # general case
-        if data == '0:'
+        if data == '0':
             self.get_node_by_id(not_node_id).set_label('1')
         else:
             self.get_node_by_id(not_node_id).set_label('0')
