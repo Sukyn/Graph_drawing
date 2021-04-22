@@ -1,9 +1,9 @@
 import sys
 import unittest
 import data
-sys.path.append('../')  # allows us to fetch files from the project root
 from modules.open_digraph import *
 from modules.utils import *
+sys.path.append('../')  # allows us to fetch files from the project root
 
 
 class InitTest(unittest.TestCase):
@@ -186,20 +186,20 @@ class NodeTest(unittest.TestCase):
 
         # Parents modification
         self.assertEqual(n0.get_parent_ids(), [])
-        n0.set_parent_ids([2, 3]) # Setting
+        n0.set_parent_ids([2, 3])  # Setting
         self.assertEqual(n0.get_parent_ids(), [2, 3])
-        n0.add_parent_id(7) # Adding
+        n0.add_parent_id(7)  # Adding
         self.assertEqual(n0.get_parent_ids(), [2, 3, 7])
-        n0.remove_parent_id(7) # Removing
+        n0.remove_parent_id(7)  # Removing
         self.assertEqual(n0.get_parent_ids(), [2, 3])
 
         # Children modification
         self.assertEqual(n0.get_children_ids(), [1])
-        n0.set_children_ids([]) # Setting
+        n0.set_children_ids([])  # Setting
         self.assertEqual(n0.get_children_ids(), [])
-        n0.add_child_id(8) # Adding
+        n0.add_child_id(8)  # Adding
         self.assertEqual(n0.get_children_ids(), [8])
-        n0.remove_child_id(8) # Removing
+        n0.remove_child_id(8)  # Removing
         self.assertEqual(n0.get_children_ids(), [])
 
     # Test of indegree calculation
@@ -353,16 +353,16 @@ class GraphTest(unittest.TestCase):
 
         # Input modification
         self.assertEqual(g.get_input_ids(), [1])
-        g.set_input_ids([3, 4]) # Setting
+        g.set_input_ids([3, 4])  # Setting
         self.assertEqual(g.get_input_ids(), [3, 4])
-        g.add_input_id(5) # Adding
+        g.add_input_id(5)  # Adding
         self.assertEqual(g.get_input_ids(), [3, 4, 5])
 
         # Output modification
         self.assertEqual(g.get_output_ids(), [2])
-        g.set_output_ids([]) # Setting
+        g.set_output_ids([])  # Setting
         self.assertEqual(g.get_output_ids(), [])
-        g.add_output_id(2) # Adding
+        g.add_output_id(2)  # Adding
         self.assertEqual(g.get_output_ids(), [2])
 
     # Test of new id generation
@@ -1019,24 +1019,25 @@ class BoolCircTest(unittest.TestCase):
     '''
     '''Test TD10'''
     def test_random_bool_circ(self):
-        #creation of 5 random bool_circ
-        rand_bool1 = bool_circ.random_bool_circ(5 , 1, 1)
+        # creation of 5 random bool_circ
+        rand_bool1 = bool_circ.random_bool_circ(5,  1, 1)
         rand_bool2 = bool_circ.random_bool_circ(20, 4, 9)
-        rand_bool3 = bool_circ.random_bool_circ(3 , 1, 2)
+        rand_bool3 = bool_circ.random_bool_circ(3,  1, 2)
         rand_bool4 = bool_circ.random_bool_circ(10, 3, 2)
         rand_bool5 = bool_circ.random_bool_circ(10, 3, 2)
 
-        #on vérifie qu'il y a le bon nombre d'input et de output
-        #pour vérifier si le graph est bien formé on regarde s'il y a un message d'erreur
-        self.assertEqual(len(rand_bool1.get_input_ids() ), 1)
+        # on vérifie qu'il y a le bon nombre d'input et de output
+        # pour vérifier si le graph est bien formé on regarde
+        # s'il y a un message d'erreur
+        self.assertEqual(len(rand_bool1.get_input_ids()),  1)
         self.assertEqual(len(rand_bool1.get_output_ids()), 1)
-        self.assertEqual(len(rand_bool2.get_input_ids() ), 4)
+        self.assertEqual(len(rand_bool2.get_input_ids()),  4)
         self.assertEqual(len(rand_bool2.get_output_ids()), 9)
-        self.assertEqual(len(rand_bool3.get_input_ids() ), 1)
+        self.assertEqual(len(rand_bool3.get_input_ids()),  1)
         self.assertEqual(len(rand_bool3.get_output_ids()), 2)
-        self.assertEqual(len(rand_bool4.get_input_ids() ), 3)
+        self.assertEqual(len(rand_bool4.get_input_ids()),  3)
         self.assertEqual(len(rand_bool4.get_output_ids()), 2)
-        self.assertEqual(len(rand_bool5.get_input_ids() ), 3)
+        self.assertEqual(len(rand_bool5.get_input_ids()),  3)
         self.assertEqual(len(rand_bool5.get_output_ids()), 2)
 
 

@@ -1,7 +1,6 @@
-import sys
-sys.path.append('../')
-import modules.utils as utils
+import utils as utils
 import random
+
 
 class node:
     def __init__(self, identity, label, parents, children):
@@ -102,8 +101,8 @@ class node:
         '''
         try:
             self.parents.remove(id)
-        except ValueError:
-            pass
+        except ValueError as ve:
+            print("Trying to remove a non-existing parent of the node :", ve)
 
     def remove_child_id(self, id):
         '''
@@ -114,7 +113,7 @@ class node:
         try:
             self.children.remove(id)
         except ValueError:
-            pass
+            print("Trying to remove a non-existing child of the node :", ve)
 
     def remove_parent_id_all(self, id):
         '''
@@ -428,12 +427,12 @@ class open_digraph:  # for open directed graph
             for child_id in children_ids:  # Checking sons are coherent
                 n = utils.count_occurence(children_ids, child_id)
                 if (utils.count_occurence(nodes_ids[child_id].get_parent_ids(),
-                                    nodes_ids[node_id].get_id()) != n):
+                                          nodes_ids[node_id].get_id()) != n):
                     return False
             for parent in parents_ids:  # Checking that parents are coherent
                 n = utils.count_occurence(parents_ids, parent)
                 if (utils.count_occurence(nodes_ids[parent].get_children_ids(),
-                                    nodes_ids[node_id].get_id()) != n):
+                                          nodes_ids[node_id].get_id()) != n):
                     return False
 
         for input in self.get_input_ids():  # Checking inputs are in nodes
@@ -477,7 +476,6 @@ class open_digraph:  # for open directed graph
         list = sorted(zip(node_ids, new_ids), key=lambda x: x[0])
         for i in range(len(list)):
             self.change_id(list[i][0], list[i][1])
-
 
     def normalize_ids(self):
         '''
@@ -540,8 +538,8 @@ class open_digraph:  # for open directed graph
         TRUE if the graph is cyclic
         cyclic means that there is a path from a node to itself
         '''
-
-        graph = self.copy()  # We make a copy to avoid removing nodes to the graph
+        # We make a copy to avoid removing nodes to the graph
+        graph = self.copy()
 
         def sub_is_cyclic(graph):
             # If there is no node in the graph, it is acyclic by definition
@@ -619,13 +617,12 @@ class open_digraph:  # for open directed graph
                 second = set(second)
                 return [item for item in first if item not in second]
 
-            sorted_output_list = diff(self.get_output_ids(),outputs)
+            sorted_output_list = diff(self.get_output_ids(), outputs)
             sorted_output_list.sort()
-            sorted_input_list = diff(self.get_input_ids(),inputs)
+            sorted_input_list = diff(self.get_input_ids(), inputs)
             sorted_input_list.sort()
             self.set_output_ids(sorted_output_list)
             self.set_input_ids(sorted_input_list)
-
 
     def compose(self, g):
         result = self.copy()
@@ -643,17 +640,17 @@ class open_digraph:  # for open directed graph
             while nodes_list:
                 # remove the node with collecting the id
                 node_id = nodes_list.pop(0)
-                if not node_id in components:
-                    #note the id
+                if node_id not in components:
+                    # note the id
                     components[node_id] = id_connexe
                     node = g.get_node_by_id(node_id)
                     parents = node.get_parent_ids()
                     children = node.get_children_ids()
-                    #remove the id
+                    # remove the id
                     g.remove_node_by_id(node_id)
-                    #taking the parents and the children
+                    # taking the parents and the children
                     nodes_list += parents + children
-            #change connexe
+            # change connexe
             id_connexe += 1
         return (id_connexe, components)
 
@@ -670,8 +667,6 @@ class open_digraph:  # for open directed graph
             components.append(open_digraph(inputs, outputs, nodes))
         return (components, self.get_input_ids(), self.get_output_ids())
 
-    '''TD8'''
-
     def dijkstra(self, src, direction=None, tgt=None):
 
         queue = [src]
@@ -682,17 +677,21 @@ class open_digraph:  # for open directed graph
 
             u = min(queue, key=lambda x: dist[x])
             queue.remove(u)
+            node_u = self.get_node_by_id(u)
+            children_u = self.get_nodes_by_ids(node_u.get_children_ids())
+            parents_u = self.get_nodes_by_ids(node_u.get_parent_ids())
             if (direction == 1):
-                neighbours = self.get_nodes_by_ids((self.get_node_by_id(u)).get_parent_ids())
+                neighbours = parents_u
             elif (direction == -1):
-                neighbours = self.get_nodes_by_ids((self.get_node_by_id(u)).get_children_ids())
+                neighbours = children_u
             else:
-                neighbours = self.get_nodes_by_ids((self.get_node_by_id(u)).get_children_ids()) + self.get_nodes_by_ids((self.get_node_by_id(u)).get_parent_ids())
+                neighbours = parents_u + children_u
 
             for neighbour in neighbours:
                 if neighbour.get_id() not in dist:
                     queue.append(neighbour.get_id())
-                if neighbour.get_id() not in dist or dist[neighbour.get_id()] > dist[u] + 1:
+                if (neighbour.get_id() not in dist or
+                        dist[neighbour.get_id()] > dist[u] + 1):
                     dist[neighbour.get_id()] = dist[u] + 1
                     prev[neighbour.get_id()] = u
                 if neighbour.get_id() == tgt:
@@ -710,11 +709,6 @@ class open_digraph:  # for open directed graph
         while node != nodeA.get_id():
             node = previous[node]
             path.insert(0, node)
-        '''
-        if distance != len(path):
-            print("La taille n'est pas bonne")
-            return None
-        '''
         return path
 
     def every_parents(self, node):
@@ -853,8 +847,6 @@ class open_digraph:  # for open directed graph
         self.remove_node_by_id(second_id)
 
 
-
-
 class bool_circ(open_digraph):
     def __init__(self, *args, check=True):
         '''
@@ -965,13 +957,13 @@ class bool_circ(open_digraph):
         graph = utils.random_graph(node_number, 1, [], [], "DAG")
         # to have indegree and maxdegree > 0
         for node_anonymous in graph.get_nodes():
-            #reset the label
+            # reset the label
             node_anonymous.set_label("")
             # make node input if it has no parent
             if not node_anonymous.get_parent_ids():
                 if not node_anonymous.get_id() in graph.get_input_ids():
                     graph.add_input_id(node_anonymous.get_id())
-            #make node output if it has no child
+            # make node output if it has no child
             if not node_anonymous.get_children_ids():
                 graph.add_output_id(node_anonymous.get_id())
 
@@ -982,22 +974,22 @@ class bool_circ(open_digraph):
 
         # we want to have the good number of input
         while len(graph.get_input_ids()) < inputs:
-            #take a random non-input node
+            # take a random non-input node
             choice = random.choice(possible_node_input)
             possible_node_input.remove(choice)
-            #create the input
+            # create the input
             graph.add_input_id(choice)
 
         while len(graph.get_input_ids()) > inputs:
-            #take 2 input nodes and remove them from the inputs
+            # take 2 input nodes and remove them from the inputs
             choice1 = random.choice(graph.get_input_ids())
             graph.del_input_id(choice1)
             choice2 = random.choice(graph.get_input_ids())
             graph.del_input_id(choice2)
 
-            #create a new node which is parent of the 2 choices
+            # create a new node which is parent of the 2 choices
             new_node_id = graph.add_node("", [], [choice1, choice2])
-            #add the input
+            # add the input
             graph.add_input_id(new_node_id)
 
         # create a list of potential node output
@@ -1007,44 +999,50 @@ class bool_circ(open_digraph):
 
         # we want to have the good number of output
         while len(graph.get_output_ids()) < outputs:
-            #take a random non-output node
+            # take a random non-output node
             choice = random.choice(possible_node_output)
             possible_node_output.remove(choice)
-            #create the output
+            # create the output
             graph.add_output_id(choice)
 
         while len(graph.get_output_ids()) > outputs:
-            #take 2 output nodes and remove them from the outputs
+            # take 2 output nodes and remove them from the outputs
             choice1 = random.choice(graph.get_output_ids())
             graph.del_output_id(choice1)
             choice2 = random.choice(graph.get_output_ids())
             graph.del_output_id(choice2)
 
-            #create a new node which is parent of the 2 choices
+            # create a new node which is parent of the 2 choices
             new_node_id = graph.add_node("", [choice1, choice2], [])
-            #add the input
+            # add the input
             graph.add_output_id(new_node_id)
 
         # we will change all of the labels
         for node_anonymous in graph.get_nodes():
-            if node_anonymous.indegree() == 1 and node_anonymous.outdegree() == 1:
-                #we make a not node
+            if (node_anonymous.indegree() == 1 and
+                    node_anonymous.outdegree() == 1):
+                # we make a not node
                 node_anonymous.set_label("~")
-            elif node_anonymous.indegree() == 1 and node_anonymous.outdegree() > 1:
-                #we make a copy node
+            elif (node_anonymous.indegree() == 1 and
+                    node_anonymous.outdegree() > 1):
+                # we make a copy node
                 pass
-            elif node_anonymous.indegree() > 1 and node_anonymous.outdegree() == 1:
-                #we make a or or and node
-                node_anonymous.set_label(random.choice(["&","|"]))
-            elif node_anonymous.indegree() > 1 and node_anonymous.outdegree() > 1:
-                #take the parents of the node
+            elif (node_anonymous.indegree() > 1 and
+                    node_anonymous.outdegree() == 1):
+                # we make a or or and node
+                node_anonymous.set_label(random.choice(["&", "|"]))
+            elif (node_anonymous.indegree() > 1 and
+                    node_anonymous.outdegree() > 1):
+                # take the parents of the node
                 nodeParents = node_anonymous.get_parent_ids().copy()
-                #create an intermediar node
-                new_node_id = graph.add_node( random.choice(["&", "|"]), node_anonymous.get_parent_ids(), [node_anonymous.get_id()])
-                #remove the parents from the node parents
+                # create an intermediar node
+                new_node_id = graph.add_node(random.choice(["&", "|"]),
+                                             node_anonymous.get_parent_ids(),
+                                             [node_anonymous.get_id()])
+                # remove the parents from the node parents
                 for parentId in nodeParents:
                     graph.remove_edge(parentId, node_anonymous.get_id())
-                #transform the input if we have to
+                # transform the input if we have to
                 if node_anonymous.get_id() in graph.get_input_ids():
                     graph.del_input_id(node_anonymous.get_id())
                     graph.add_input_id(new_node_id)
@@ -1065,8 +1063,7 @@ class bool_circ(open_digraph):
     def apply_copy_rule(self, data_node_id, cp_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
         assert data in ['0', '1'], "wrong data label"
-        assert self.get_node_by_id(data_node_id).get_children_ids()==[cp_node_id], "the two nodes are not connected"
-        return_nodes=[]
+        return_nodes = []
         # case where the copy node is also an output
         for ind in range(len(self.get_output_ids())):
             if self.get_output_ids()[ind] == cp_node_id:
@@ -1085,8 +1082,7 @@ class bool_circ(open_digraph):
     def apply_not_rule(self, data_node_id, not_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
         assert data in ['0', '1'], "wrong data label"
-        assert self.get_node_by_id(data_node_id).get_children_ids()==[not_node_id], "the two nodes are not connected"
-        return_nodes=[]
+        return_nodes = []
         # case where the not node is also an output
         for ind in range(len(self.get_output_ids())):
             if self.get_output_ids()[ind] == not_node_id:
@@ -1104,13 +1100,9 @@ class bool_circ(open_digraph):
 
     def apply_and_rule(self, data_node_id, and_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
-        assert data in ['0', '1'], "wrong data label"
-        assert self.get_node_by_id(data_node_id).get_children_ids()==[and_node_id], "the two nodes are not connected"
-
         if (data == "1"):
             return [and_node_id]
-
-        return_nodes=[]
+        return_nodes = []
         # case where the copy node is also an output
         for ind in range(len(self.get_output_ids())):
             if self.get_output_ids()[ind] == and_node_id:
@@ -1129,13 +1121,9 @@ class bool_circ(open_digraph):
 
     def apply_and_rule(self, data_node_id, or_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
-        assert data in ['0', '1'], "wrong data label"
-        assert self.get_node_by_id(data_node_id).get_children_ids()==[or_node_id], "the two nodes are not connected"
-
         if (data == "0"):
             return [or_node_id]
-
-        return_nodes=[]
+        return_nodes = []
         # case where the copy node is also an output
         for ind in range(len(self.get_output_ids())):
             if self.get_output_ids()[ind] == or_node_id:
@@ -1155,12 +1143,9 @@ class bool_circ(open_digraph):
     def apply_xor_rule(self, data_node_id, xor_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
         assert data in ['0', '1'], "wrong data label"
-        assert self.get_node_by_id(data_node_id).get_children_ids()==[xor_node_id], "the two nodes are not connected"
-
         if (data == "0"):
             return [xor_node_id]
-
-        return_nodes=[]
+        return_nodes = []
         # case where the copy node is also an output
         for ind in range(len(self.get_output_ids())):
             if self.get_output_ids()[ind] == xor_node_id:
@@ -1178,13 +1163,14 @@ class bool_circ(open_digraph):
     def apply_neutral_rule(self, neutral_node_id):
         data = self.get_node_by_id(neutral_node_id).get_label()
         assert data in ['|', '^', '&'], "wrong data label"
+        children = self.get_node_by_id(neutral_node_id).get_children_ids()
         if (data == "|" or data == "^"):
-            new_id = self.add_node("0", [], self.get_node_by_id(neutral_node_id).get_children_ids())
+            new_id = self.add_node("0", [], children)
             self.remove_node_by_id(neutral_node_id)
             return [new_id]
         elif (data == "&"):
-            new_id = self.add_node("1", [], self.get_node_by_id(neutral_node_id).get_children_ids())
+            new_id = self.add_node("1", [], children)
             self.remove_node_by_id(neutral_node_id)
             return [new_id]
 
-    #def reduce_eval(self):
+    # def reduce_eval(self):
