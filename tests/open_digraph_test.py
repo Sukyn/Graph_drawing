@@ -56,7 +56,7 @@ class InitTest(unittest.TestCase):
         # '' are input nodes
         # '&' are AND nodes
         # '|' are OR nodes
-        # '~ are NOT nodes
+        # '~'' are NOT nodes
         # It allows us to make logical phrases'
 
         # Nodes initialization

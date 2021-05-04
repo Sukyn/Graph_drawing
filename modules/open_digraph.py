@@ -654,6 +654,14 @@ class open_digraph:  # for open directed graph
             id_connexe += 1
         return (id_connexe, components)
 
+    ''' TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    '''
     def graph_permutation(self):
         nb, compo_id = self.connected_components()
         components = []
@@ -916,20 +924,18 @@ class bool_circ(open_digraph):
                             self.get_nodes())
 
     def is_well_formed(self):
+        if not super().is_well_formed():
+            return False
 
         for node in self.get_nodes():
             label = node.get_label()
-            if (label == "&"):
-                if (node.outdegree() != 1):
-                    return False
-            elif (label == "^"):
+            if ( label == "&" or
+                 label == "^" or
+                 label == "|" ):
                 if (node.outdegree() != 1):
                     return False
             elif (label == "0" or label == "1"):
                 if (node.indegree() > 0):
-                    return False
-            elif (label == "|"):
-                if (node.outdegree() != 1):
                     return False
             elif (label == "~"):
                 if (node.indegree() != 1 or node.outdegree() != 1):
@@ -949,9 +955,9 @@ class bool_circ(open_digraph):
         '''
         **TYPE** bool_circ
         That function returns a random bool_circ with
-        a number n of nodes
-        a number input of inputs
-        and a number output of outputs
+        a number node_number of nodes
+        a number inputs > 0 of inputs
+        and a number outputs > 0 of outputs
         '''
         # create a random graph
         graph = utils.random_graph(node_number, 1, [], [], "DAG")
@@ -1048,12 +1054,16 @@ class bool_circ(open_digraph):
                     graph.add_input_id(new_node_id)
 
             else:
-                "{y'a un problème ça va pas du tout}.traduct('english')"
+                print("{y'a un problème ça va pas du tout}.traduct('english')")
 
         return bool_circ(graph)
 
-    def registre(n):
+    def registre(n, size=8):
         binary_form = bin(n)[2:]
+        if(len(binary_form) > size):
+            print("the number is too big")
+            return bool_circ.empty()
+        binary_form = "0"*(size-len(binary_form)) + binary_form
         circ = bool_circ.empty()
         for char in binary_form:
             id = circ.add_node(label=char)
@@ -1119,7 +1129,7 @@ class bool_circ(open_digraph):
         assert(self.is_well_formed())
         return return_nodes
 
-    def apply_and_rule(self, data_node_id, or_node_id):
+    def apply_or_rule(self, data_node_id, ors_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
         if (data == "0"):
             return [or_node_id]
@@ -1173,4 +1183,54 @@ class bool_circ(open_digraph):
             self.remove_node_by_id(neutral_node_id)
             return [new_id]
 
-    # def reduce_eval(self):
+    def reduce_eval(self):
+        nodes = self.get_nodes()
+        cofeuilles = [node for node in nodes
+                      if (node.indegree() == 0 and node.outdegree() > 0)]
+        while (cofeuilles):
+            feuille_id = cofeuilles[0].get_id()
+            new_feuilles = []
+            if (cofeuilles[0].get_label() not in [0,1]):
+                new_feuilles = self.apply_neutral_rule(feuille_id)
+            operation_id = cofeuilles[0].get_children_ids()[0]
+            operation = self.get_node_by_id(operation_id).get_label()
+            if (operation == ""):
+                new_feuilles = self.apply_copy_rule(feuille_id)
+            if (operation == "&"):
+                new_feuilles = self.apply_and_rule(feuille_id, operation_id)
+            if (operation == "|"):
+                new_feuilles = self.apply_or_rule(feuille_id, operation_id)
+            if (operation == "^"):
+                new_feuilles = self.apply_xor_rule(feuille_id, operation_id)
+            if (operation == "~"):
+                new_feuilles = apply_not_rule(feuille_id, operation_id)
+
+            for feuille in new_feuilles:
+                self.add_node(label=feuille.get_label(),
+                              parents=feuille.get_parent_ids(),
+                              children=feuille.get_children_ids())
+                if (feuille.indegree() == 0 and feuille.outdegree() > 0):
+                    cofeuilles.append(feuille)
+
+
+            cofeuilles.pop(0)
+
+    def adder(registre1, registre2, retenue):
+        if( len(registre1.get_nodes()) != len(registre2.get_nodes()) ):
+            print("the two registers don't have the same size")
+            return bool_circ.empty()
+
+        if (len(registre1.get_nodes()) == 1):
+            node1 = node(1, "" , []    , [3, 6])
+            node2 = node(2, "" , []    , [3, 6])
+            node3 = node(3, "^", [1, 2], [4]   )
+            node4 = node(4, "" , [3]   , [7, 8])
+            node5 = node(5, "" , []    , [7, 8])
+            node6 = node(6, "&", [1, 2], [9]   )
+            node7 = node(7, "&", [4, 5], [9]   )
+            node8 = node(8, "^", [4, 5], []    )
+            node9 = node(9, "|", [7, 8], []    )
+            node_list = [node1, node2, node3,
+                         node4, node5, node6, 
+                         node7, node8, node9]
+            graphe_initial = graph()
