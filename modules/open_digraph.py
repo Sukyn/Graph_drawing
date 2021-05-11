@@ -1,4 +1,4 @@
-import utils as utils
+import modules.utils as utils
 import random
 
 
@@ -112,7 +112,7 @@ class node:
         '''
         try:
             self.children.remove(id)
-        except ValueError:
+        except ValueError as ve:
             print("Trying to remove a non-existing child of the node :", ve)
 
     def remove_parent_id_all(self, id):
@@ -563,34 +563,57 @@ class open_digraph:  # for open directed graph
         return sub_is_cyclic(graph)
 
     def min_id(self):
+        '''
+        **TYPE** int
+        returns the min of all nodes id
+        '''
         return min(self.get_node_ids())
 
     def max_id(self):
+        '''
+        **TYPE** int
+        returns the max of all nodes id
+        '''
         return max(self.get_node_ids())
 
     def shift_indices(self, n):
-        new_ids = [(ids + n) for ids in self.get_node_ids()]
-        list = sorted(zip(self.get_node_ids(), new_ids), key=lambda x: x[0])
+        '''
+        **TYPE** void
+        n: int
+        change all the node's id by adding n
+        '''
+        # new_ids = [(ids + n) for ids in self.get_node_ids()]
+        # list = sorted(zip(self.get_node_ids(), new_ids), key=lambda x: x[0])
+        node_ids = self.get_node_ids().copy()
+
         if (n < 0):
-            for i in range(len(list)):
-                self.change_id(list[i][0], list[i][1])
+            for id in node_ids:
+                self.change_id(id, id + n)
         else:
-            for i in range(len(list)-1, -1, -1):
-                self.change_id(list[i][0], list[i][1])
+            node_ids.reverse()
+            for id in node_ids:
+                self.change_id(id, id + n)
+
+        self.set_input_ids([id + n for id in self.get_input_ids()])
+        self.set_output_ids([id + n for id in self.get_output_ids()])
+
 
     def iparallel(self, g, in_perm=None, out_perm=None):
-        for inp in g.get_input_ids():
-            self.add_input_id(inp)
-        for outp in g.get_output_ids():
-            self.add_output_id(outp)
-        '''
-        if self.max_id() > g.min_id():
-            g.shift_indices(self.max_id() - g.min_id() + 1)
-        '''
+        shift = self.max_id() - g.min_id() + 1
+        g.shift_indices(shift)
+
         for node in g.get_nodes():
-            if node.get_id() in self.get_node_ids():
-                node.change_id(self.new_id())
             self.get_id_node_map()[node.get_id()] = node
+        if in_perm is None:
+            for inp in g.get_input_ids():
+                self.add_input_id(inp)
+        else:
+            self.set_input_ids(in_perm)
+        if out_perm is None:
+            for outp in g.get_output_ids():
+                self.add_output_id(outp)
+        else:
+            self.set_output_ids(out_perm)
 
     def parallel(self, g, in_perm=None, out_perm=None):
         result = self.copy()
@@ -598,13 +621,17 @@ class open_digraph:  # for open directed graph
         return result
 
     def icompose(self, g):
-        inputs = g.get_input_ids().copy()
+
+        g.shift_indices(self.max_id() - g.min_id() + 1)
         outputs = self.get_output_ids().copy()
+
+        inputs = g.get_input_ids().copy()
         if not len(inputs) == len(outputs):
             raise ValueError
         else:
 
             self.iparallel(g)
+
             # if the lists 'inputs' and 'outputs' have values in common
             '''
             if(bool(set(inputs).intersection(outputs))):
@@ -1062,9 +1089,9 @@ class bool_circ(open_digraph):
         binary_form = bin(n)[2:]
         if(len(binary_form) > size):
             print("the number is too big")
-            return bool_circ.empty()
+            return bool_circ(open_digraph.empty())
         binary_form = "0"*(size-len(binary_form)) + binary_form
-        circ = bool_circ.empty()
+        circ = bool_circ(open_digraph.empty())
         for char in binary_form:
             id = circ.add_node(label=char)
             circ.add_output_id(id)
@@ -1076,18 +1103,17 @@ class bool_circ(open_digraph):
         return_nodes = []
         # case where the copy node is also an output
         for ind in range(len(self.get_output_ids())):
-            if self.get_output_ids()[ind] == cp_node_id:
+            if ind == cp_node_id:
                 new_id = self.add_node(data, [], [])
                 self.outputs[ind] = new_id
                 return_nodes.append(new_id)
-        # general case
-        children = self.get_node_by_id(cp_node_id).get_children_ids()
-        for child in children:
-            new_id = self.add_node(data, [], [child])
-            return_nodes.append(new_id)
-        self.remove_nodes_by_id([data_node_id, cp_node_id])
-        assert(self.is_well_formed())
-        return return_nodes
+                # general case
+                children = self.get_node_by_id(cp_node_id).get_children_ids()
+                for child in children:
+                    self.get_node_by_id(new_id).add_child_id(child)
+        self.get_node_by_id(cp_node_id).set_label(self.get_node_by_id(data_node_id).get_label())
+        self.remove_node_by_id(data_node_id)
+        return return_nodes+[cp_node_id]
 
     def apply_not_rule(self, data_node_id, not_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
@@ -1105,8 +1131,7 @@ class bool_circ(open_digraph):
         else:
             self.get_node_by_id(not_node_id).set_label('0')
         self.remove_node_by_id(data_node_id)
-        assert(self.is_well_formed())
-        return return_nodes
+        return return_nodes + [not_node_id]
 
     def apply_and_rule(self, data_node_id, and_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
@@ -1126,8 +1151,7 @@ class bool_circ(open_digraph):
             return_nodes.append(new_id)
         self.get_node_by_id(and_node_id).set_label('0')
         self.remove_node_by_id(data_node_id)
-        assert(self.is_well_formed())
-        return return_nodes
+        return return_nodes + [and_node_id]
 
     def apply_or_rule(self, data_node_id, ors_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
@@ -1147,8 +1171,7 @@ class bool_circ(open_digraph):
             return_nodes.append(new_id)
         self.get_node_by_id(or_node_id).set_label('0')
         self.remove_node_by_id(data_node_id)
-        assert(self.is_well_formed())
-        return return_nodes
+        return return_nodes+[or_node_id]
 
     def apply_xor_rule(self, data_node_id, xor_node_id):
         data = self.get_node_by_id(data_node_id).get_label()
@@ -1164,38 +1187,39 @@ class bool_circ(open_digraph):
                 return_nodes.append(new_id)
         # general case
         new_id = self.add_node('~', [xor_node_id], [])
-        return_nodes.append(new_id)
-        return_nodes.append(xor_node_id)
+        self.get_node_by_id(new_id).add_parent_id(xor_node_id)
+        self.get_node_by_id(new_id).set_children_ids(self.get_node_by_id(new_id).get_children_ids())
         self.remove_node_by_id(data_node_id)
-        assert(self.is_well_formed())
-        return return_nodes
+        return return_nodes+[xor_node_id]
 
     def apply_neutral_rule(self, neutral_node_id):
         data = self.get_node_by_id(neutral_node_id).get_label()
+        print(data + "\n\n")
         assert data in ['|', '^', '&'], "wrong data label"
         children = self.get_node_by_id(neutral_node_id).get_children_ids()
         if (data == "|" or data == "^"):
-            new_id = self.add_node("0", [], children)
-            self.remove_node_by_id(neutral_node_id)
-            return [new_id]
+            self.get_node_by_id(neutral_node_id).set_label("0")
         elif (data == "&"):
-            new_id = self.add_node("1", [], children)
-            self.remove_node_by_id(neutral_node_id)
-            return [new_id]
+            self.get_node_by_id(neutral_node_id).set_label("1")
+        self.remove_node_by_id(neutral_node_id)
+        return [new_id]
 
     def reduce_eval(self):
         nodes = self.get_nodes()
         cofeuilles = [node for node in nodes
                       if (node.indegree() == 0 and node.outdegree() > 0)]
+        #print(cofeuilles)
         while (cofeuilles):
+            print(cofeuilles[0])
+
             feuille_id = cofeuilles[0].get_id()
             new_feuilles = []
-            if (cofeuilles[0].get_label() not in [0,1]):
+            if (cofeuilles[0].get_label() not in ["0","1"]):
                 new_feuilles = self.apply_neutral_rule(feuille_id)
             operation_id = cofeuilles[0].get_children_ids()[0]
             operation = self.get_node_by_id(operation_id).get_label()
             if (operation == ""):
-                new_feuilles = self.apply_copy_rule(feuille_id)
+                new_feuilles = self.apply_copy_rule(feuille_id, operation_id)
             if (operation == "&"):
                 new_feuilles = self.apply_and_rule(feuille_id, operation_id)
             if (operation == "|"):
@@ -1206,31 +1230,56 @@ class bool_circ(open_digraph):
                 new_feuilles = apply_not_rule(feuille_id, operation_id)
 
             for feuille in new_feuilles:
-                self.add_node(label=feuille.get_label(),
-                              parents=feuille.get_parent_ids(),
-                              children=feuille.get_children_ids())
-                if (feuille.indegree() == 0 and feuille.outdegree() > 0):
-                    cofeuilles.append(feuille)
+                self.add_node(label=self.get_node_by_id(feuille).get_label(),
+                              parents=self.get_node_by_id(feuille).get_parent_ids(),
+                              children=self.get_node_by_id(feuille).get_children_ids())
+                if (self.get_node_by_id(feuille).indegree() == 0 and
+                    self.get_node_by_id(feuille).outdegree() > 0):
+                        cofeuilles.append(self.get_node_by_id(feuille))
 
 
             cofeuilles.pop(0)
 
     def adder(registre1, registre2, retenue):
+
         if( len(registre1.get_nodes()) != len(registre2.get_nodes()) ):
             print("the two registers don't have the same size")
             return bool_circ.empty()
 
         if (len(registre1.get_nodes()) == 1):
-            node1 = node(1, "" , []    , [3, 6])
-            node2 = node(2, "" , []    , [3, 6])
-            node3 = node(3, "^", [1, 2], [4]   )
-            node4 = node(4, "" , [3]   , [7, 8])
-            node5 = node(5, "" , []    , [7, 8])
-            node6 = node(6, "&", [1, 2], [9]   )
-            node7 = node(7, "&", [4, 5], [9]   )
-            node8 = node(8, "^", [4, 5], []    )
-            node9 = node(9, "|", [7, 8], []    )
+            node1 = node(3, "" , []    , [5, 8])
+            node2 = node(4, "" , []    , [5, 8])
+            node3 = node(5, "^", [3, 4], [6]   )
+            node4 = node(6, "" , [5]   , [9, 10])
+            node5 = node(7, "" , []    , [9, 10])
+            node6 = node(8, "&", [3, 4], [11]   )
+            node7 = node(9, "&", [6, 7], [11]   )
+            node8 = node(10, "^", [6, 7], []    )
+            node9 = node(11, "|", [8, 9], []    )
             node_list = [node1, node2, node3,
-                         node4, node5, node6, 
+                         node4, node5, node6,
                          node7, node8, node9]
-            graphe_initial = graph()
+            graphe_initial = bool_circ(open_digraph([3,4,7], [10,11], node_list))
+            registre1.iparallel(registre2)
+            registre1.iparallel(retenue)
+            registre1.icompose(graphe_initial)
+            registre1.reduce_eval()
+            return registre1
+
+
+    #    else:
+    #        registre11 = []
+    #        registre12 = []
+    #        registre21 = []
+    #        registre22 = []
+    #        for i in range(len(registre1)/2):
+    #            new_registre11.append(registre1[i])
+    #            new_registre12.append(registre1[i+len(registre1)])
+#            new_registre21.append(registre2[i])
+    #            new_registre22.append(registre2[i+len(registre2)])
+    #
+    #        retenue2, new_registre2 = adder(registre12, regitre22, retenue)
+    #        new_retenue, new_registre1 = adder(registre11, registre21, retenue2)
+    #
+    #
+    #

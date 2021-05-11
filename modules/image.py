@@ -1,8 +1,8 @@
 from PIL import Image, ImageDraw
 import math
 import random
-import sys
 import numpy as np
+import sys
 sys.path.append('../')
 import modules.utils
 import modules.open_digraph as odgraph
@@ -160,7 +160,7 @@ def drawnode(self, node, point, verbose=False):
 ImageDraw.ImageDraw.drawnode = drawnode
 
 
-def drawgraph(self, g, method='manual',
+def drawgraph(self, g, method='manual', width=1, height=1,
               node_pos=None,
               input_pos=None,
               output_pos=None):
@@ -179,12 +179,12 @@ def drawgraph(self, g, method='manual',
     method that draws nodes from g with the position list node_pos
     '''
     if(method == 'random'):
-        random = random_layout(g)
+        random = random_layout(g, width, height)
         node_pos = random[0]
         input_pos = random[1]
         output_pos = random[2]
     elif (method == 'circle'):
-        circle = circle_layout(g)
+        circle = circle_layout(g, )
         node_pos = circle[0]
         input_pos = circle[1]
         output_pos = circle[2]
@@ -209,7 +209,7 @@ def drawgraph(self, g, method='manual',
 ImageDraw.ImageDraw.graph = drawgraph
 
 
-def random_layout(graph):
+def random_layout(graph, width, height):
     node_ids = graph.get_node_ids()  # node ids list
     nbr = len(node_ids)              # number of node
     node_pos = {}
@@ -306,10 +306,18 @@ def slope_angle(p1, p2):
         return math.atan(coeff_direct)
 
 
-def Bezier(self, p0, paux, p1, dt=0.1):
-    '''NON TERMINE'''
-    for t in np.arange(0, 1, dt) :
+def Bezier(self, p0, paux, p1, dt=0.01):
+    '''
+    **TYPE** void
+    p0 :    point; start
+    paux :  point; auxiliary point of the curve
+    p1 :    point; finish
+    draws a Bezier curve
+    '''
+    for t in np.arange(0, 0.9, dt) :
         B = (1-t)*((1-t)*p0 + t*paux) + t*((1-t)*paux + t*p1)
         print(B)
         Bsuiv = (1-(t+dt))*((1-(t+dt))*p0 + (t+dt)*paux) + (t+dt)*((1-(t+dt))*paux + (t+dt)*p1)
         self.line([B.n(), Bsuiv.n()], 'black')
+
+ImageDraw.ImageDraw.Bezier = Bezier

@@ -692,7 +692,7 @@ class GraphTest(unittest.TestCase):
 
         # Parallel composition
         # test should be a parallel composition of g and h
-        test = g.parallel(h, [3], [7])
+        test = g.parallel(h)
         self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7, 8], test.get_node_ids())
         self.assertEqual([0, 2, 5, 5, 6], test.get_input_ids())
         self.assertEqual([1, 4, 5, 7], test.get_output_ids())
@@ -730,18 +730,19 @@ class GraphTest(unittest.TestCase):
 
         # Checking values (composition)
         self.assertEqual(h.get_input_ids(), [5, 5, 6])
-        self.assertEqual(h.get_output_ids(), [1, 4])
-        self.assertEqual(h.get_node_ids(), [0, 1, 2, 3, 4, 5, 6, 7, 8])
+        self.assertEqual(h.get_output_ids(), [1+9, 4+9])
+        self.assertEqual(h.get_node_ids(), [5, 6, 7, 8, 0+9,
+                                            1+9, 2+9, 3+9, 4+9])
         # And it should now have edges between h outputs and
         # g inputs
-        self.assertEqual(h.get_node_by_id(5).get_children_ids(), [0, 6])
-        self.assertEqual(h.get_node_by_id(7).get_children_ids(), [2])
-        self.assertEqual(h.get_node_by_id(0).get_parent_ids(), [5])
-        self.assertEqual(h.get_node_by_id(2).get_parent_ids(), [7])
+        self.assertEqual(h.get_node_by_id(5).get_children_ids(), [6, 0+9])
+        self.assertEqual(h.get_node_by_id(7).get_children_ids(), [2+9])
+        self.assertEqual(h.get_node_by_id(0+9).get_parent_ids(), [5])
+        self.assertEqual(h.get_node_by_id(2+9).get_parent_ids(), [7])
         # g should not have been modified
-        self.assertEqual([0, 1, 2, 3, 4], g.get_node_ids())
-        self.assertEqual([0, 2], g.get_input_ids())
-        self.assertEqual([1, 4], g.get_output_ids())
+        self.assertEqual([0+9, 1+9, 2+9, 3+9, 4+9], g.get_node_ids())
+        self.assertEqual([0+9, 2+9], g.get_input_ids())
+        self.assertEqual([1+9, 4+9], g.get_output_ids())
 
     # Without modifications of the graph :
     def test_compose(self):
@@ -764,22 +765,24 @@ class GraphTest(unittest.TestCase):
         # Composition
         # Note : we can not compose g with h because g has 2 outputs
         # and h has 3 inputs, but the other way is OK
+
         test = h.compose(g)
 
         # Checking values (composition)
         self.assertEqual(test.get_input_ids(), [5, 5, 6])
-        self.assertEqual(test.get_output_ids(), [1, 4])
-        self.assertEqual(test.get_node_ids(), [0, 1, 2, 3, 4, 5, 6, 7, 8])
+        self.assertEqual(test.get_output_ids(), [10, 13])
+        self.assertEqual(test.get_node_ids(), [5, 6, 7, 8,
+                                               0+9, 1+9, 2+9, 3+9, 4+9])
         # And it should now have edges between h outputs and
         # g inputs
-        self.assertEqual(test.get_node_by_id(5).get_children_ids(), [0, 6])
-        self.assertEqual(test.get_node_by_id(7).get_children_ids(), [2])
-        self.assertEqual(test.get_node_by_id(0).get_parent_ids(), [5])
-        self.assertEqual(test.get_node_by_id(2).get_parent_ids(), [7])
+        self.assertEqual(test.get_node_by_id(5).get_children_ids(), [6, 0+9])
+        self.assertEqual(test.get_node_by_id(7).get_children_ids(), [2+9])
+        self.assertEqual(test.get_node_by_id(0+9).get_parent_ids(), [5])
+        self.assertEqual(test.get_node_by_id(2+9).get_parent_ids(), [7])
         # But g and h should not have been modified
-        self.assertEqual([0, 1, 2, 3, 4], g.get_node_ids())
-        self.assertEqual([0, 2], g.get_input_ids())
-        self.assertEqual([1, 4], g.get_output_ids())
+        self.assertEqual([0+9, 1+9, 2+9, 3+9, 4+9], g.get_node_ids())
+        self.assertEqual([0+9, 2+9], g.get_input_ids())
+        self.assertEqual([1+9, 4+9], g.get_output_ids())
         self.assertEqual([5, 6, 7, 8], h.get_node_ids())
         self.assertEqual([5, 5, 6], h.get_input_ids())
         self.assertEqual([5, 7], h.get_output_ids())
@@ -1040,6 +1043,12 @@ class BoolCircTest(unittest.TestCase):
         self.assertEqual(len(rand_bool5.get_input_ids()),  3)
         self.assertEqual(len(rand_bool5.get_output_ids()), 2)
 
+    def test_11_05(self):
+        registre1 = bool_circ.registre(1, 1)
+        registre2 = bool_circ.registre(0, 1)
+        retenue = bool_circ.registre(0, 1)
+        final = bool_circ.adder(registre1, registre2, retenue)
+        print("\n\n",final)
 
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run

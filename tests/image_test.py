@@ -83,10 +83,10 @@ class ImageTest(unittest.TestCase):
     draw.graph(g,'topological_sorting',{0:point(50,20),1:point(130,70),2:point(300,250)},[point(2,2)], [point(400,400)])
 
     image.save("test.jpg")
-    draw.drawnode(node, centre,True)
-    draw.graph(g,'random')
+    draw.drawnode(nodeS, centre,True)
+    draw.graph(g,'random', width=width, height=height)
     draw.arrows(pasOrigine,centre)
-    draw.drawnode(node, pasOrigine,True)
+    draw.drawnode(nodeS, pasOrigine,True)
 
 
 
@@ -118,10 +118,20 @@ class ImageTest(unittest.TestCase):
     n0list = [odgraph.node(i, '{}'.format(i), [], [1]) for i in range(8)]
     g = odgraph.open_digraph([1], [2], n0list)
     # g.add_edge(1, 2)
-    # draw.graph(g,'random')
+    # draw.graph(g,'random', width=width, height=height)
     # draw.graph(g,'circle',{0:point(50,20),1:point(130,70),2:point(300,250)},[point(2,2)], [point(400,400)])
     pasOrigine = point(33, 200)
     # draw.arrows(pasOrigine,centre, 4, 1)
-    draw.drawnode(node, pasOrigine, True)
-
+    # draw.drawnode(node, pasOrigine, True)
     image.save("test.jpg")
+
+    # Bezier tests
+    image = Image.new("RGB", (width, height), 'white')
+    draw = ImageDraw.Draw(image)
+
+    point1 = point(25, 25)
+    point2 = point(25, 100)
+    pointaux = point(50, 50)
+    draw.Bezier(point1, pointaux, point2)
+
+    image.save("Bezier_test.jpg")
