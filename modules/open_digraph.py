@@ -1,7 +1,6 @@
 import modules.utils as utils
 import random
 
-
 class node:
     def __init__(self, identity, label, parents, children):
         '''
@@ -1098,147 +1097,118 @@ class bool_circ(open_digraph):
         return circ
 
     def apply_copy_rule(self, data_node_id, cp_node_id):
-        data = self.get_node_by_id(data_node_id).get_label()
-        assert data in ['0', '1'], "wrong data label"
-        return_nodes = []
-        # case where the copy node is also an output
-        for ind in range(len(self.get_output_ids())):
-            if ind == cp_node_id:
-                new_id = self.add_node(data, [], [])
-                self.outputs[ind] = new_id
-                return_nodes.append(new_id)
-                # general case
-                children = self.get_node_by_id(cp_node_id).get_children_ids()
-                for child in children:
-                    self.get_node_by_id(new_id).add_child_id(child)
+        # Copy rule :
+        # On copie simplement la valeur du parent (normalement un noeud copy
+        # ne peut donc avoir qu'un parent)
         self.get_node_by_id(cp_node_id).set_label(self.get_node_by_id(data_node_id).get_label())
-        self.remove_node_by_id(data_node_id)
-        return return_nodes+[cp_node_id]
+        self.remove_edge(data_node_id, cp_node_id)
 
     def apply_not_rule(self, data_node_id, not_node_id):
-        data = self.get_node_by_id(data_node_id).get_label()
-        assert data in ['0', '1'], "wrong data label"
-        return_nodes = []
-        # case where the not node is also an output
-        for ind in range(len(self.get_output_ids())):
-            if self.get_output_ids()[ind] == not_node_id:
-                new_id = self.add_node(data, [], [])
-                self.outputs[ind] = new_id
-                return_nodes.append(new_id)
-        # general case
-        if data == '0':
+        # Not rule :
+        # On inverse la valeur du parent (normalement un noeud not
+        # ne peut donc avoir qu'un parent)
+        if self.get_node_by_id(data_node_id).get_label() == '0':
             self.get_node_by_id(not_node_id).set_label('1')
         else:
             self.get_node_by_id(not_node_id).set_label('0')
-        self.remove_node_by_id(data_node_id)
-        return return_nodes + [not_node_id]
+        self.remove_edge(data_node_id, not_node_id)
 
     def apply_and_rule(self, data_node_id, and_node_id):
-        data = self.get_node_by_id(data_node_id).get_label()
-        if (data == "1"):
-            return [and_node_id]
-        return_nodes = []
-        # case where the copy node is also an output
-        for ind in range(len(self.get_output_ids())):
-            if self.get_output_ids()[ind] == and_node_id:
-                new_id = self.add_node(data, [], [])
-                self.outputs[ind] = new_id
-                return_nodes.append(new_id)
-        # general case
-        parents = self.get_node_by_id(and_node_id).get_parent_ids()
-        for parent in parents:
-            new_id = self.add_node('', [parent], [])
-            return_nodes.append(new_id)
+        # And rule :
+        # On vérifie que tous les parents valent 1, si on en trouve un 0
+        # c'est que notre valeur vaut zéro
+        if (self.get_node_by_id(data_node_id).get_label() == "1"):
+            self.remove_edge(data_node_id, and_node_id)
+            return
         self.get_node_by_id(and_node_id).set_label('0')
-        self.remove_node_by_id(data_node_id)
-        return return_nodes + [and_node_id]
+        for parent in self.get_node_by_id(and_node_id).get_parent_ids().copy():
+            self.remove_edge(parent, and_node_id)
 
-    def apply_or_rule(self, data_node_id, ors_node_id):
-        data = self.get_node_by_id(data_node_id).get_label()
-        if (data == "0"):
-            return [or_node_id]
-        return_nodes = []
-        # case where the copy node is also an output
-        for ind in range(len(self.get_output_ids())):
-            if self.get_output_ids()[ind] == or_node_id:
-                new_id = self.add_node(data, [], [])
-                self.outputs[ind] = new_id
-                return_nodes.append(new_id)
-        # general case
-        parents = self.get_node_by_id(or_node_id).get_parent_ids()
+    def apply_or_rule(self, data_node_id, or_node_id):
+        # Or rule :
+        # On vérifie que tous les parents valent 0, si on en trouve un 1
+        # c'est que notre valeur vaut un
+        if (self.get_node_by_id(data_node_id).get_label() == "0"):
+            self.remove_edge(data_node_id, or_node_id)
+            return
+
+        self.get_node_by_id(or_node_id).set_label('1')
+        parents = self.get_node_by_id(or_node_id).get_parent_ids().copy()
         for parent in parents:
-            new_id = self.add_node('', [parent], [])
-            return_nodes.append(new_id)
-        self.get_node_by_id(or_node_id).set_label('0')
-        self.remove_node_by_id(data_node_id)
-        return return_nodes+[or_node_id]
+            self.remove_edge(parent, or_node_id)
 
     def apply_xor_rule(self, data_node_id, xor_node_id):
-        data = self.get_node_by_id(data_node_id).get_label()
-        assert data in ['0', '1'], "wrong data label"
-        if (data == "0"):
-            return [xor_node_id]
-        return_nodes = []
-        # case where the copy node is also an output
-        for ind in range(len(self.get_output_ids())):
-            if self.get_output_ids()[ind] == xor_node_id:
-                new_id = self.add_node(data, [], [])
-                self.outputs[ind] = new_id
-                return_nodes.append(new_id)
-        # general case
-        new_id = self.add_node('~', [xor_node_id], [])
-        self.get_node_by_id(new_id).add_parent_id(xor_node_id)
-        self.get_node_by_id(new_id).set_children_ids(self.get_node_by_id(new_id).get_children_ids())
-        self.remove_node_by_id(data_node_id)
-        return return_nodes+[xor_node_id]
+        # Xor rule :
+        # Si on trouve un élément qui vaut 1, on inverse la valeur globale
+        if (self.get_node_by_id(data_node_id).get_label() == "0"):
+            self.remove_edge(data_node_id, xor_node_id)
+            return
+
+        new_id = self.add_node('~', [], [])
+        if (xor_node_id in self.get_output_ids()):
+            self.add_edge(xor_node_id, new_id)
+            self.del_output_id(xor_node_id)
+            self.add_output_id(new_id)
+            self.remove_edge(data_node_id, xor_node_id)
+            return
+
+        xor_children = self.get_node_by_id(xor_node_id).get_children_ids()
+        for child in xor_children:
+            self.remove_edge(xor_node_id, child)
+            self.add_edge(new_id, child)
+
+        self.get_node_by_id(new_id).set_parent_ids([xor_node_id])
+        self.get_node_by_id(xor_node_id).set_children_ids([new_id])
+
+        self.remove_edge(data_node_id, xor_node_id)
 
     def apply_neutral_rule(self, neutral_node_id):
+        # Neutral rule :
+        # Si on devait comparer à de la récursivité, c'est le cas de base
+        # Par exemple si on a un | (ou) dont les parents ne sont que des zéros
+        # On va les retirer petit à petit, jusqu'à ce qu'il n'y en ait plus,
+        # à ce moment là on comprend donc que ce n'étaient que des zéros
+        # et donc le OU vaut 0 (faux)
         data = self.get_node_by_id(neutral_node_id).get_label()
-        print(data + "\n\n")
-        assert data in ['|', '^', '&'], "wrong data label"
-        children = self.get_node_by_id(neutral_node_id).get_children_ids()
         if (data == "|" or data == "^"):
             self.get_node_by_id(neutral_node_id).set_label("0")
         elif (data == "&"):
             self.get_node_by_id(neutral_node_id).set_label("1")
-        self.remove_node_by_id(neutral_node_id)
-        return [new_id]
 
     def reduce_eval(self):
-        nodes = self.get_nodes()
-        cofeuilles = [node for node in nodes
+        # Une cofeuille c'est un noeud qui n'a pas de parents, mais des enfants
+        cofeuilles = [node for node in self.get_nodes()
                       if (node.indegree() == 0 and node.outdegree() > 0)]
-        #print(cofeuilles)
+        # Tant qu'il y a des cofeuilles, c'est qu'on peut réduire
         while (cofeuilles):
-            print(cofeuilles[0])
-
             feuille_id = cofeuilles[0].get_id()
-            new_feuilles = []
+            # Case de base
             if (cofeuilles[0].get_label() not in ["0","1"]):
-                new_feuilles = self.apply_neutral_rule(feuille_id)
-            operation_id = cofeuilles[0].get_children_ids()[0]
-            operation = self.get_node_by_id(operation_id).get_label()
-            if (operation == ""):
-                new_feuilles = self.apply_copy_rule(feuille_id, operation_id)
-            if (operation == "&"):
-                new_feuilles = self.apply_and_rule(feuille_id, operation_id)
-            if (operation == "|"):
-                new_feuilles = self.apply_or_rule(feuille_id, operation_id)
-            if (operation == "^"):
-                new_feuilles = self.apply_xor_rule(feuille_id, operation_id)
-            if (operation == "~"):
-                new_feuilles = apply_not_rule(feuille_id, operation_id)
+                self.apply_neutral_rule(feuille_id)
+            # Autres cas
+            elif len(cofeuilles[0].get_children_ids()) > 0:
+                operation_id = cofeuilles[0].get_children_ids()[0]
+                operation = self.get_node_by_id(operation_id).get_label()
+                if (operation == ""):
+                    self.apply_copy_rule(feuille_id, operation_id)
+                if (operation == "&"):
+                    self.apply_and_rule(feuille_id, operation_id)
+                if (operation == "|"):
+                    self.apply_or_rule(feuille_id, operation_id)
+                if (operation == "^"):
+                    self.apply_xor_rule(feuille_id, operation_id)
+                if (operation == "~"):
+                    self.apply_not_rule(feuille_id, operation_id)
 
-            for feuille in new_feuilles:
-                self.add_node(label=self.get_node_by_id(feuille).get_label(),
-                              parents=self.get_node_by_id(feuille).get_parent_ids(),
-                              children=self.get_node_by_id(feuille).get_children_ids())
-                if (self.get_node_by_id(feuille).indegree() == 0 and
-                    self.get_node_by_id(feuille).outdegree() > 0):
-                        cofeuilles.append(self.get_node_by_id(feuille))
+                if (self.get_node_by_id(operation_id).indegree() == 0):
+                    cofeuilles.append(self.get_node_by_id(operation_id))
 
+                for node in self.get_nodes():
+                    if (node.outdegree() == 0):
+                        self.remove_node_by_id(node.get_id())
 
-            cofeuilles.pop(0)
+            if (len(cofeuilles[0].get_children_ids()) == 0):
+                cofeuilles.pop(0)
 
     def adder(registre1, registre2, retenue):
 
