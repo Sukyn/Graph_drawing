@@ -153,90 +153,7 @@ class node:
         return self.outdegree() + self.indegree()
 
 
-class open_digraph:  # for open directed graph
-
-    def __init__(self, inputs, outputs, nodes):
-        '''
-        inputs: int list; the ids of the input nodes
-        outputs: int list; the ids of the output nodes
-        nodes: node list;
-        '''
-        self.inputs = inputs
-        self.outputs = outputs
-        # self.nodes: <int,node> dict
-        self.nodes = {node.id: node for node in nodes}
-        self.compute_indegrees()
-        self.compute_outdegrees()
-
-    def compute_indegrees(self):
-        # This part is useful to calculate the indegree of nodes
-        # First, we reset all values
-        for node in self.nodes:
-            self.nodes[node].fromworld = 0
-        # Then we calculate new ones
-        for input in self.inputs:  # The graph should be well formed
-            if input in self.get_node_ids():
-                self.nodes[input].fromworld += 1
-
-    def compute_outdegrees(self):
-        # This part is useful to calculate the indegree of nodes
-        # First, we reset all values
-        for node in self.nodes:
-            self.nodes[node].toworld = 0
-        # Then we calculate new ones
-        for output in self.outputs:  # The graph should be well formed
-            if output in self.get_node_ids():
-                self.nodes[output].toworld += 1
-
-    def __str__(self):
-        '''
-        **TYPE** string
-        '''
-        # **EXAMPLE** ([0, 1], [2], 4)
-        return ("(" + str(self.inputs) + ", " + str(self.outputs) +
-                ", " + str(self.nodes) + ")")
-
-    def __repr__(self):
-        '''
-        **EXAMPLE**
-        open_digraph([0,1], [2], [node(4, 'i', [0, 2], [3])])
-        '''
-        return "open_digraph" + str(self)
-
-    def __eq__(self, g):
-        '''
-        **TYPE** boolean
-        return self == g
-        '''
-        # We check that inputs are equals
-        if not (self.inputs == g.inputs):
-            return False
-        # We check that outputs are equals
-        if not (self.outputs == g.outputs):
-            return False
-        # We check that nodes are equals
-        if not (self.nodes == g.nodes):
-            return False
-        # If they're all equals, then the graphs are equals
-        return True
-
-    def empty():
-        '''
-        **TYPE** open digraph
-        constructor of an empty graph
-        no inputs, no outputs, no nodes
-        '''
-        return open_digraph([], [], [])
-
-    def copy(self):
-        '''
-        **TYPE** open_digraph
-        function that returns a copy of the object
-        '''
-        return open_digraph(self.get_input_ids().copy(),
-                            self.get_output_ids().copy(),
-                            [i.copy() for i in self.get_nodes()])
-
+class open_digraph_getters_setters:
     # ----- GETTERS -----
     # functions to get the attributes of the object
     # (encapsulation)
@@ -280,6 +197,38 @@ class open_digraph:  # for open directed graph
                       )
         return result
 
+    def max_indegree(self):
+        '''
+        **TYPE** int
+        returns the maximum indegree of the graph,
+        i.e. the maximum of each node's indegree
+        '''
+        return max([node.indegree() for node in self.get_nodes()])
+
+    def min_indegree(self):
+        '''
+        **TYPE** int
+        returns the minimum indegree of the graph,
+        i.e. the minimum of each node's indegree
+        '''
+        return min([node.indegree() for node in self.get_nodes()])
+
+    def max_outdegree(self):
+        '''
+        **TYPE** int
+        returns the maximum outdegree of the graph,
+        i.e. the maximum of each node's outdegree
+        '''
+        return max([node.outdegree() for node in self.get_nodes()])
+
+    def min_outdegree(self):
+        '''
+        **TYPE** int
+        returns the minimum indegree of the graph,
+        i.e. the minimum of each node's outdegree
+        '''
+        return min([node.outdegree() for node in self.get_nodes()])
+
     # ----- SETTERS -----
     # functions to modify the attributes of the object
     # (encapsulation)
@@ -309,16 +258,11 @@ class open_digraph:  # for open directed graph
         self.outputs.remove(old_id)
         self.compute_outdegrees()
 
-    def new_id(self):
-        '''
-        **TYPE** void
-        function that returns an unused id for an edge
-        '''
-        id = 0
-        while(id in self.get_node_ids()):
-            id += 1
-        return id
 
+class open_digraph_management:
+    # nodes    managements
+    # children managements
+    # parents  managements
     def add_edge(self, src, tgt):
         '''
         **TYPE** void
@@ -408,6 +352,500 @@ class open_digraph:  # for open directed graph
             except KeyError:
                 pass
 
+    def node_fusion(self, first_id, second_id, label=None):
+        '''
+        **TYPE** void
+        first_id : int
+        second_id : int
+        label : string
+        Function that fusion two nodes and call it label
+        '''
+        # We check if the nodes are in the graph
+        node_ids = self.get_node_ids()
+        # If not, we print an error
+        # (n.b : we could just say "okay let's do nothing")
+        if first_id not in node_ids or second_id not in node_ids:
+            print("Il existe pas")
+
+        # Getting nodes
+        first_node = self.get_node_by_id(first_id)  # The one saved
+        second_node = self.get_node_by_id(second_id)  # The one killed
+
+        # Fusion of inputs & outputs
+        for id in second_node.get_input_ids():
+            first_node.add_input_id(id)
+        for id in second_node.get_output_ids():
+            first_node.add_output_id(id)
+        # Fusion of parents & children
+        for child_id in second_node.get_children_ids():
+            first_node.add_child_id(child_id)
+        for parent_id in second_node.get_children_ids():
+            first_node.add_child_id(parent_id)
+
+        # The user can set his own label to the fusion
+        if label:
+            first_node.set_label(label)
+
+        # GO TO HELL WE DON'T NEED YOU ANYMORE (remove the node)
+        self.remove_node_by_id(second_id)
+
+def change_id(self, node_id, new_id):
+    '''
+    **TYPE** void
+    new_id: int; new id of the node
+    node_id: int; actual id of the node
+    change node_id by new_id
+    '''
+    if (new_id not in self.get_node_ids()):
+        node_map = self.get_id_node_map()
+        node = node_map.pop(node_id)
+        # Our node map should have the node with another id
+        node_map[new_id] = node
+        # We change the id
+        node.set_id(new_id)
+
+        for child in node.get_children_ids():
+            self.get_node_by_id(child).remove_parent_id(node_id)
+            self.get_node_by_id(child).add_parent_id(new_id)
+
+        for parent in node.get_parent_ids():
+            self.get_node_by_id(parent).remove_child_id(node_id)
+            self.get_node_by_id(parent).add_child_id(new_id)
+
+def change_ids(self, node_ids, new_ids):
+    '''
+    **TYPE** void
+    new_ids: int list; new ids of the nodes
+    node_ids: int list; actual ids of the nodes
+    change all of the node_ids by new_ids
+    '''
+    list = sorted(zip(node_ids, new_ids), key=lambda x: x[0])
+    for i in range(len(list)):
+        self.change_id(list[i][0], list[i][1])
+
+
+class open_digraph_composition:
+    # compositions of the graphs
+
+    def shift_indices(self, n):
+        '''
+        **TYPE** void
+        n: int
+        change all the node's id by adding n
+        '''
+        node_ids = self.get_node_ids().copy()
+
+        # if n is positive, we have to begin at the end
+        if (n < 0):
+            for id in node_ids:
+                self.change_id(id, id + n)
+        else:
+            node_ids.reverse()
+            for id in node_ids:
+                self.change_id(id, id + n)
+
+        # don't forget the inputs and outputs
+        self.set_input_ids([id + n for id in self.get_input_ids()])
+        self.set_output_ids([id + n for id in self.get_output_ids()])
+
+
+    def iparallel(self, g, in_perm=None, out_perm=None):
+        '''
+        **TYPE** void
+        g : graph; the graph to add with
+        in_perm : int list; the new input list
+        out_perm : int list; the new output list
+        combine the two graphs in one by adding the nodes and
+        the inputs/outputs from g to self
+        '''
+        # shift the ids
+        shift = self.max_id() - g.min_id() + 1
+        g.shift_indices(shift)
+
+        # add the g nodes to self
+        for node in g.get_nodes():
+            self.get_id_node_map()[node.get_id()] = node
+        # make the inputs
+        if in_perm is None:
+            for inp in g.get_input_ids():
+                self.add_input_id(inp)
+        else:
+            self.set_input_ids(in_perm)
+        # make the outputs
+        if out_perm is None:
+            for outp in g.get_output_ids():
+                self.add_output_id(outp)
+        else:
+            self.set_output_ids(out_perm)
+
+    def parallel(self, g, in_perm=None, out_perm=None):
+        '''
+        **TYPE** open_digraph
+        g : graph; the graph to add with
+        in_perm : int list; the new input list
+        out_perm : int list; the new output list
+        combine the two graphs like iparallel but return
+        the new graphs without modify them
+        '''
+        result = self.copy()
+        result.iparallel(g, in_perm, out_perm)
+        return result
+
+    def icompose(self, g):
+        '''
+        **TYPE** void
+        g : graph; the graph to compose with
+        modify self by adding the nodes from g and merging
+        the self outputs with the g inputs
+        '''
+        # shift the ids
+        g.shift_indices(self.max_id() - g.min_id() + 1)
+        outputs = self.get_output_ids().copy()
+
+        # test the equality of inputs and outputs
+        inputs = g.get_input_ids().copy()
+        if not len(inputs) == len(outputs):
+            raise ValueError
+        else:
+            # combine the graphs
+            self.iparallel(g)
+            # merging the inputs/outputs
+            for i in range(len(inputs)):
+                self.add_edge(outputs[i], inputs[i])
+
+            # create the fonction of list minus list
+            def diff(first, second):
+                second = set(second)
+                return [item for item in first if item not in second]
+
+            # take the final outputs
+            sorted_output_list = diff(self.get_output_ids(), outputs)
+            sorted_output_list.sort()
+            # take the final inputs
+            sorted_input_list = diff(self.get_input_ids(), inputs)
+            sorted_input_list.sort()
+            # setting the inputs/outputs
+            self.set_output_ids(sorted_output_list)
+            self.set_input_ids(sorted_input_list)
+
+    def compose(self, g):
+        '''
+        **TYPE** open_digraph
+        g : graph; the graph to compose with
+        compose the graphs like icompose but without modify the graphs
+        and return the created graph
+        '''
+        result = self.copy()
+        result.icompose(g)
+        return result
+
+
+class open_digraph_dijkstra:
+    # dijkstra algorithm
+    # paths (longest and shortest)
+    # components
+    def connected_components(self):
+        '''
+        **TYPE** (int, dictionary)
+        counts the number of independant graph in self and creates a dictionary
+        which assign all nodes ids to the id of the subgraph
+        '''
+        components = {}
+        g = self.copy()
+        id_connexe = 0
+
+        while g.get_node_ids():
+            # take a node
+            nodes_list = [g.min_id()]
+            while nodes_list:
+                # remove the node with collecting the id
+                node_id = nodes_list.pop(0)
+                if node_id not in components:
+                    # note the id
+                    components[node_id] = id_connexe
+                    node = g.get_node_by_id(node_id)
+                    parents = node.get_parent_ids()
+                    children = node.get_children_ids()
+                    # remove the id
+                    g.remove_node_by_id(node_id)
+                    # taking the parents and the children
+                    nodes_list += parents + children
+            # change connexe
+            id_connexe += 1
+        return (id_connexe, components)
+
+    ''' TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    TO DO : Permutations (ajouter paramètre) + permutation inverse
+    '''
+    def graph_permutation(self):
+        '''
+        **TYPE** (open_digraph list, int list, int list)
+        return the list of the component graphs,
+        the inputs list and the ouputs list
+        '''
+        nb, compo_id = self.connected_components()
+        components = []
+        # for all the components
+        for i in range(nb):
+            # take the nodes
+            node_ids = [key for (key, value) in compo_id.items() if value == i]
+            nodes = self.get_nodes_by_ids(node_ids)
+            # take the inputs
+            inputs = [inp for inp in self.get_input_ids()
+                      if inp in node_ids]
+            # take the outputs
+            outputs = [outp for outp in self.get_output_ids()
+                       if outp in node_ids]
+            # add the component to the graph list
+            components.append(open_digraph(inputs, outputs, nodes))
+        return (components, self.get_input_ids(), self.get_output_ids())
+
+    def dijkstra(self, src, direction=None, tgt=None):
+        '''
+        **TYPE** (dictionary, dictionary)
+        src : int; the id of the node source
+        direction : 1 or -1;    - 1 -> take the parents
+                                - -1 -> take the children
+                                - None -> take both
+        tgt : int; the id of the node target
+        the dijkstra algorithm
+        '''
+        queue = [src]
+        dist = {src: 0}
+        prev = {}
+
+        while queue:
+
+            u = min(queue, key=lambda x: dist[x])
+            queue.remove(u)
+            node_u = self.get_node_by_id(u)
+            children_u = self.get_nodes_by_ids(node_u.get_children_ids())
+            parents_u = self.get_nodes_by_ids(node_u.get_parent_ids())
+            if (direction == 1):
+                neighbours = parents_u
+            elif (direction == -1):
+                neighbours = children_u
+            else:
+                neighbours = parents_u + children_u
+
+            for neighbour in neighbours:
+                if neighbour.get_id() not in dist:
+                    queue.append(neighbour.get_id())
+                if (neighbour.get_id() not in dist or
+                        dist[neighbour.get_id()] > dist[u] + 1):
+                    dist[neighbour.get_id()] = dist[u] + 1
+                    prev[neighbour.get_id()] = u
+                if neighbour.get_id() == tgt:
+                    return (dist[neighbour.get_id()], prev)
+        return (dist, prev)
+
+    def shortest_path(self, nodeA, nodeB):
+        '''
+        **TYPE** int list
+        nodeA : node
+        nodeB : node
+        return the shortest path to go from nodeA to nodeB by
+        creating the id list of the nodes
+        '''
+        # test if nodeB is in graph
+        if nodeB not in self.get_nodes():
+            print("nodeB not in the graph")
+            return None
+
+        distance, previous = self.dijkstra(nodeA.get_id(), tgt=nodeB.get_id())
+        path = [nodeB.get_id()]
+        node = nodeB.get_id()
+        # create the path
+        while node != nodeA.get_id():
+            node = previous[node]
+            path.insert(0, node)
+        return path
+
+    def longest_path(self, u, v):
+        '''
+        **TYPE** (int list, int)
+        u : node
+        v : node
+        return the longest path of node ids and the length of the path
+        '''
+        dist = {u.get_id(): 0}
+        prev = {}
+
+        if self.is_cyclic():
+            raise ValueError("The graph isn't acyclic")
+        else:
+            sorted_list = self.topological_sorting()
+            depth = self.node_depth(u)
+
+            # For depths of more than k
+            for i in range(depth, len(sorted_list)):
+
+                for w in sorted_list[i]:
+                    for parent in self.get_node_by_id(w).get_parent_ids():
+                        # If one of the parents of
+                        # node w is in the dist dictionary
+
+                        if parent in dist:
+                            # We take the parent of dist maximum
+                            parent_max = max(dist, key=lambda x: dist[x])
+                            # We give the value of parent_max to dist[w]
+                            dist[w] = dist[parent] + 1
+                            # We save the parent_max node in prev[w]
+                            prev[w] = parent_max
+
+        path = [v.get_id()]
+        node = v.get_id()
+        while node != u.get_id():
+            node = prev[node]
+            path.insert(0, node)
+        return path, len(path)
+
+    def every_parents(self, node):
+        '''
+        **TYPE** int list
+        node : node
+        return the parents id list
+        '''
+        result = node.get_parent_ids().copy()
+        # take the parents
+        for parent in result:
+            # recursivity
+            value = self.every_parents(self.get_node_by_id(parent))
+            # add the parents to the result
+            if value not in result:
+                result += value
+        return result
+
+    def parents_distance(self, nodeA, nodeB):
+        '''
+        **TYPE** dictionary
+        nodeA : node
+        nodeB : node
+        return the common parents with their distance
+        to nodeA and nodeB by tuple
+        '''
+        result = {}
+        for nodeA_parent in self.every_parents(nodeA):
+            for nodeB_parent in self.every_parents(nodeB):
+                if nodeA_parent == nodeB_parent:
+                    # distance calculation
+                    distA = self.dijkstra(nodeA.get_id(), tgt=nodeA_parent)[0]
+                    distB = self.dijkstra(nodeB.get_id(), tgt=nodeB_parent)[0]
+                    # add to the dictionary
+                    result[nodeA_parent] = (distA, distB)
+        return result
+
+
+class open_digraph(open_digraph_getters_setters,
+                   open_digraph_management,
+                   open_digraph_composition,
+                   open_digraph_dijkstra):  # for open directed graph
+
+    def __init__(self, inputs, outputs, nodes):
+        '''
+        inputs: int list; the ids of the input nodes
+        outputs: int list; the ids of the output nodes
+        nodes: node list;
+        '''
+        self.inputs = inputs
+        self.outputs = outputs
+        # self.nodes: <int,node> dict
+        self.nodes = {node.id: node for node in nodes}
+        self.compute_indegrees()
+        self.compute_outdegrees()
+
+    def compute_indegrees(self):
+        '''
+        **TYPE** void
+        makes the inputs nodes correspond to the inputs graph
+        '''
+        # This part is useful to calculate the indegree of nodes
+        # First, we reset all values
+        for node in self.nodes:
+            self.nodes[node].fromworld = 0
+        # Then we calculate new ones
+        for input in self.inputs:  # The graph should be well formed
+            if input in self.get_node_ids():
+                self.nodes[input].fromworld += 1
+
+    def compute_outdegrees(self):
+        '''
+        **TYPE** void
+        makes the outputs nodes correspond to the outputs graph
+        '''
+        # This part is useful to calculate the indegree of nodes
+        # First, we reset all values
+        for node in self.nodes:
+            self.nodes[node].toworld = 0
+        # Then we calculate new ones
+        for output in self.outputs:  # The graph should be well formed
+            if output in self.get_node_ids():
+                self.nodes[output].toworld += 1
+
+    def __str__(self):
+        '''
+        **TYPE** string
+        '''
+        # **EXAMPLE** ([0, 1], [2], 4)
+        return ("(" + str(self.inputs) + ", " + str(self.outputs) +
+                ", " + str(self.nodes) + ")")
+
+    def __repr__(self):
+        '''
+        **EXAMPLE**
+        open_digraph([0,1], [2], [node(4, 'i', [0, 2], [3])])
+        '''
+        return "open_digraph" + str(self)
+
+    def __eq__(self, g):
+        '''
+        **TYPE** boolean
+        return self == g
+        '''
+        # We check that inputs are equals
+        if not (self.inputs == g.inputs):
+            return False
+        # We check that outputs are equals
+        if not (self.outputs == g.outputs):
+            return False
+        # We check that nodes are equals
+        if not (self.nodes == g.nodes):
+            return False
+        # If they're all equals, then the graphs are equals
+        return True
+
+    def empty():
+        '''
+        **TYPE** open digraph
+        constructor of an empty graph
+        no inputs, no outputs, no nodes
+        '''
+        return open_digraph([], [], [])
+
+    def copy(self):
+        '''
+        **TYPE** open_digraph
+        function that returns a copy of the object
+        '''
+        return open_digraph(self.get_input_ids().copy(),
+                            self.get_output_ids().copy(),
+                            [i.copy() for i in self.get_nodes()])
+
+    def new_id(self):
+        '''
+        **TYPE** void
+        function that returns an unused id for an edge
+        '''
+        id = 0
+        while(id in self.get_node_ids()):
+            id += 1
+        return id
+
     def is_well_formed(self):
         '''
         **TYPE** boolean
@@ -442,40 +880,6 @@ class open_digraph:  # for open directed graph
                 return False
         return True
 
-    def change_id(self, node_id, new_id):
-        '''
-        **TYPE** void
-        new_id: int; new id of the node
-        node_id: int; actual id of the node
-        change node_id by new_id
-        '''
-        if (new_id not in self.get_node_ids()):
-            node_map = self.get_id_node_map()
-            node = node_map.pop(node_id)
-            # Our node map should have the node with another id
-            node_map[new_id] = node
-            # We change the id
-            node.set_id(new_id)
-
-            for child in node.get_children_ids():
-                self.get_node_by_id(child).remove_parent_id(node_id)
-                self.get_node_by_id(child).add_parent_id(new_id)
-
-            for parent in node.get_parent_ids():
-                self.get_node_by_id(parent).remove_child_id(node_id)
-                self.get_node_by_id(parent).add_child_id(new_id)
-
-    def change_ids(self, node_ids, new_ids):
-        '''
-        **TYPE** void
-        new_ids: int list; new ids of the nodes
-        node_ids: int list; actual ids of the nodes
-        change all of the node_ids by new_ids
-        '''
-        list = sorted(zip(node_ids, new_ids), key=lambda x: x[0])
-        for i in range(len(list)):
-            self.change_id(list[i][0], list[i][1])
-
     def normalize_ids(self):
         '''
         **TYPE** void
@@ -499,37 +903,7 @@ class open_digraph:  # for open directed graph
                                        j)
                 for i in range(n)] for j in range(n)]
 
-    def max_indegree(self):
-        '''
-        **TYPE** int
-        returns the maximum indegree of the graph,
-        i.e. the maximum of each node's indegree
-        '''
-        return max([node.indegree() for node in self.get_nodes()])
 
-    def min_indegree(self):
-        '''
-        **TYPE** int
-        returns the minimum indegree of the graph,
-        i.e. the minimum of each node's indegree
-        '''
-        return min([node.indegree() for node in self.get_nodes()])
-
-    def max_outdegree(self):
-        '''
-        **TYPE** int
-        returns the maximum outdegree of the graph,
-        i.e. the maximum of each node's outdegree
-        '''
-        return max([node.outdegree() for node in self.get_nodes()])
-
-    def min_outdegree(self):
-        '''
-        **TYPE** int
-        returns the miniimum indegree of the graph,
-        i.e. the minimum of each node's outdegree
-        '''
-        return min([node.outdegree() for node in self.get_nodes()])
 
     def is_cyclic(self):
         '''
@@ -574,189 +948,6 @@ class open_digraph:  # for open directed graph
         returns the max of all nodes id
         '''
         return max(self.get_node_ids())
-
-    def shift_indices(self, n):
-        '''
-        **TYPE** void
-        n: int
-        change all the node's id by adding n
-        '''
-        # new_ids = [(ids + n) for ids in self.get_node_ids()]
-        # list = sorted(zip(self.get_node_ids(), new_ids), key=lambda x: x[0])
-        node_ids = self.get_node_ids().copy()
-
-        if (n < 0):
-            for id in node_ids:
-                self.change_id(id, id + n)
-        else:
-            node_ids.reverse()
-            for id in node_ids:
-                self.change_id(id, id + n)
-
-        self.set_input_ids([id + n for id in self.get_input_ids()])
-        self.set_output_ids([id + n for id in self.get_output_ids()])
-
-
-    def iparallel(self, g, in_perm=None, out_perm=None):
-        shift = self.max_id() - g.min_id() + 1
-        g.shift_indices(shift)
-
-        for node in g.get_nodes():
-            self.get_id_node_map()[node.get_id()] = node
-        if in_perm is None:
-            for inp in g.get_input_ids():
-                self.add_input_id(inp)
-        else:
-            self.set_input_ids(in_perm)
-        if out_perm is None:
-            for outp in g.get_output_ids():
-                self.add_output_id(outp)
-        else:
-            self.set_output_ids(out_perm)
-
-    def parallel(self, g, in_perm=None, out_perm=None):
-        result = self.copy()
-        result.iparallel(g, in_perm, out_perm)
-        return result
-
-    def icompose(self, g):
-
-        g.shift_indices(self.max_id() - g.min_id() + 1)
-        outputs = self.get_output_ids().copy()
-
-        inputs = g.get_input_ids().copy()
-        if not len(inputs) == len(outputs):
-            raise ValueError
-        else:
-
-            self.iparallel(g)
-
-            for i in range(len(inputs)):
-                self.add_edge(outputs[i], inputs[i])
-
-            def diff(first, second):
-                second = set(second)
-                return [item for item in first if item not in second]
-
-            sorted_output_list = diff(self.get_output_ids(), outputs)
-            sorted_output_list.sort()
-            sorted_input_list = diff(self.get_input_ids(), inputs)
-            sorted_input_list.sort()
-            self.set_output_ids(sorted_output_list)
-            self.set_input_ids(sorted_input_list)
-
-    def compose(self, g):
-        result = self.copy()
-        result.icompose(g)
-        return result
-
-    def connected_components(self):
-        components = {}
-        g = self.copy()
-        id_connexe = 0
-
-        while g.get_node_ids():
-            # take a node
-            nodes_list = [g.min_id()]
-            while nodes_list:
-                # remove the node with collecting the id
-                node_id = nodes_list.pop(0)
-                if node_id not in components:
-                    # note the id
-                    components[node_id] = id_connexe
-                    node = g.get_node_by_id(node_id)
-                    parents = node.get_parent_ids()
-                    children = node.get_children_ids()
-                    # remove the id
-                    g.remove_node_by_id(node_id)
-                    # taking the parents and the children
-                    nodes_list += parents + children
-            # change connexe
-            id_connexe += 1
-        return (id_connexe, components)
-
-    ''' TO DO : Permutations (ajouter paramètre) + permutation inverse
-    TO DO : Permutations (ajouter paramètre) + permutation inverse
-    TO DO : Permutations (ajouter paramètre) + permutation inverse
-    TO DO : Permutations (ajouter paramètre) + permutation inverse
-    TO DO : Permutations (ajouter paramètre) + permutation inverse
-    TO DO : Permutations (ajouter paramètre) + permutation inverse
-    TO DO : Permutations (ajouter paramètre) + permutation inverse
-    '''
-    def graph_permutation(self):
-        nb, compo_id = self.connected_components()
-        components = []
-        for i in range(nb):
-            node_ids = [key for (key, value) in compo_id.items() if value == i]
-            nodes = self.get_nodes_by_ids(node_ids)
-            inputs = [inp for inp in self.get_input_ids()
-                      if inp in node_ids]
-            outputs = [outp for outp in self.get_output_ids()
-                       if outp in node_ids]
-            components.append(open_digraph(inputs, outputs, nodes))
-        return (components, self.get_input_ids(), self.get_output_ids())
-
-    def dijkstra(self, src, direction=None, tgt=None):
-
-        queue = [src]
-        dist = {src: 0}
-        prev = {}
-
-        while queue:
-
-            u = min(queue, key=lambda x: dist[x])
-            queue.remove(u)
-            node_u = self.get_node_by_id(u)
-            children_u = self.get_nodes_by_ids(node_u.get_children_ids())
-            parents_u = self.get_nodes_by_ids(node_u.get_parent_ids())
-            if (direction == 1):
-                neighbours = parents_u
-            elif (direction == -1):
-                neighbours = children_u
-            else:
-                neighbours = parents_u + children_u
-
-            for neighbour in neighbours:
-                if neighbour.get_id() not in dist:
-                    queue.append(neighbour.get_id())
-                if (neighbour.get_id() not in dist or
-                        dist[neighbour.get_id()] > dist[u] + 1):
-                    dist[neighbour.get_id()] = dist[u] + 1
-                    prev[neighbour.get_id()] = u
-                if neighbour.get_id() == tgt:
-                    return (dist[neighbour.get_id()], prev)
-        return (dist, prev)
-
-    def shortest_path(self, nodeA, nodeB):
-        if nodeB not in self.get_nodes():
-            print("nodeB not in the graph")
-            return None
-
-        distance, previous = self.dijkstra(nodeA.get_id(), tgt=nodeB.get_id())
-        path = [nodeB.get_id()]
-        node = nodeB.get_id()
-        while node != nodeA.get_id():
-            node = previous[node]
-            path.insert(0, node)
-        return path
-
-    def every_parents(self, node):
-        result = node.get_parent_ids().copy()
-        for parent in result:
-            value = self.every_parents(self.get_node_by_id(parent))
-            if value not in result:
-                result += value
-        return result
-
-    def parents_distance(self, nodeA, nodeB):
-        result = {}
-        for nodeA_parent in self.every_parents(nodeA):
-            for nodeB_parent in self.every_parents(nodeB):
-                if nodeA_parent == nodeB_parent:
-                    distA = self.dijkstra(nodeA.get_id(), tgt=nodeA_parent)[0]
-                    distB = self.dijkstra(nodeB.get_id(), tgt=nodeB_parent)[0]
-                    result[nodeA_parent] = (distA, distB)
-        return result
 
     def topological_sorting(self):
         '''
@@ -808,69 +999,3 @@ class open_digraph:  # for open directed graph
         returned by the topological_sorting function
         '''
         return len(self.topological_sorting())
-
-    def longest_path(self, u, v):
-        dist = {u.get_id(): 0}
-        prev = {}
-
-        if self.is_cyclic():
-            raise ValueError("The graph isn't acyclic")
-        else:
-            sorted_list = self.topological_sorting()
-            depth = self.node_depth(u)
-
-            # For depths of more than k
-            for i in range(depth, len(sorted_list)):
-
-                for w in sorted_list[i]:
-                    for parent in self.get_node_by_id(w).get_parent_ids():
-                        # If one of the parents of
-                        # node w is in the dist dictionary
-
-                        if parent in dist:
-                            # We take the parent of dist maximum
-                            parent_max = max(dist, key=lambda x: dist[x])
-                            # We give the value of parent_max to dist[w]
-                            dist[w] = dist[parent] + 1
-                            # We save the parent_max node in prev[w]
-                            prev[w] = parent_max
-
-        path = [v.get_id()]
-        node = v.get_id()
-        while node != u.get_id():
-            node = prev[node]
-            path.insert(0, node)
-        return path, len(path)
-
-    def node_fusion(self, first_id, second_id, label=None):
-        '''
-        Function that fusion two nodes
-        '''
-        # We check if the nodes are in the graph
-        node_ids = self.get_node_ids()
-        # If not, we print an error
-        # (n.b : we could just say "okay let's do nothing")
-        if first_id not in node_ids or second_id not in node_ids:
-            print("Il existe pas")
-
-        # Getting nodes
-        first_node = self.get_node_by_id(first_id)  # The one saved
-        second_node = self.get_node_by_id(second_id)  # The one killed
-
-        # Fusion of inputs & outputs
-        for id in second_node.get_input_ids():
-            first_node.add_input_id(id)
-        for id in second_node.get_output_ids():
-            first_node.add_output_id(id)
-        # Fusion of parents & children
-        for child_id in second_node.get_children_ids():
-            first_node.add_child_id(child_id)
-        for parent_id in second_node.get_children_ids():
-            first_node.add_child_id(parent_id)
-
-        # The user can set his own label to the fusion
-        if label:
-            first_node.set_label(label)
-
-        # GO TO HELL WE DON'T NEED YOU ANYMORE
-        self.remove_node_by_id(second_id)

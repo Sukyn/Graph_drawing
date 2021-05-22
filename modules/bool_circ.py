@@ -99,6 +99,8 @@ class bool_circ(open_digraph):
     def random_bool_circ(node_number, inputs, outputs):
         '''
         **TYPE** bool_circ
+        inputs : int list
+        outputs : int list
         That function returns a random bool_circ with
         a number node_number of nodes
         a number inputs > 0 of inputs
@@ -199,23 +201,37 @@ class bool_circ(open_digraph):
                     graph.add_input_id(new_node_id)
 
             else:
-                print("{y'a un problème ça va pas du tout}.traduct('english')")
+                print("There is a problem, this message shouldn't be printed")
 
         return bool_circ(graph)
 
     def registre(n, size=8):
+        '''
+        **TYPE** bool_circ
+        n : int
+        size : int
+        return the graph which correspond to the number in binary
+        '''
+        # create the binary number
         binary_form = bin(n)[2:]
         if(len(binary_form) > size):
             print("the number is too big")
             return bool_circ(open_digraph.empty())
         binary_form = "0"*(size-len(binary_form)) + binary_form
+        # create a bool_circ
         circ = bool_circ(open_digraph.empty())
         for char in binary_form:
+            # add the node 0 or 1
             id = circ.add_node(label=char)
             circ.add_output_id(id)
         return circ
 
     def binary_from_registre(circ):
+        '''
+        **TYPE** int
+        circ : bool_circ
+        transform the register into a int
+        '''
         result = 0
         for i, node in enumerate(reversed(circ.get_nodes())):
             if node.get_label() == "1":
@@ -341,15 +357,22 @@ class bool_circ(open_digraph):
         #    time.sleep(5)
 
     def adder_basic(registre1, registre2, retenue):
-
+        '''
+        **TYPE** bool_circ
+        registre1 : bool_circ
+        registre2 : bool_circ
+        retenue : bool_circ
+        Fonction qui est le cas initial quand les registres sont egaux a 1
+        '''
         if( len(registre1.get_nodes()) != len(registre2.get_nodes()) ):
             print("the two registers don't have the same size")
             return bool_circ.empty()
 
         if (len(registre1.get_nodes()) == 1):
-            node1 = node(3, "" , []    , [5, 8])
-            node2 = node(4, "" , []    , [5, 8])
-            node3 = node(5, "^", [3, 4], [6]   )
+            # create the bool_circ
+            node1 = node(3, "" , []    , [5, 8] )
+            node2 = node(4, "" , []    , [5, 8] )
+            node3 = node(5, "^", [3, 4], [6]    )
             node4 = node(6, "" , [5]   , [9, 11])
             node5 = node(7, "" , []    , [9, 11])
             node6 = node(8, "&", [3, 4], [10]   )
@@ -370,8 +393,18 @@ class bool_circ(open_digraph):
             return registre1
 
         else:
-            return
+            print("problem")
+            return bool_circ(open_digraph.empty())
+
     def adder(registre1, registre2, retenue):
+        '''
+        **TYPE** bool_circ
+        registre1 : bool_circ
+        registre2 : bool_circ
+        retenue : bool_circ
+        Fonction qui fait recursivement adder et prend le cas
+        initial quand len = 1 avec adder_basic
+        '''
 
         # On va chercher à découper le registre en deux parts égales
         full_nodes_1 = registre1.get_nodes()
@@ -430,4 +463,10 @@ class bool_circ(open_digraph):
         return bool_circ(open_digraph([], ids, registre))
 
     def half_adder(registre1, registre2):
+        '''
+        **TYPE** bool_circ
+        registre1 : bool_circ
+        registre2 : bool_circ
+        return the register which is the sum of the two registers
+        '''
         return bool_circ.adder(registre1, registre2, bool_circ.registre(0, 1))
