@@ -1,6 +1,6 @@
 import modules.utils as utils
 import random
-
+import time
 class node:
     def __init__(self, identity, label, parents, children):
         '''
@@ -631,11 +631,6 @@ class open_digraph:  # for open directed graph
 
             self.iparallel(g)
 
-            # if the lists 'inputs' and 'outputs' have values in common
-            '''
-            if(bool(set(inputs).intersection(outputs))):
-                self.shift_indices(g.max_id() - self.min_id() + 1)
-            '''
             for i in range(len(inputs)):
                 self.add_edge(outputs[i], inputs[i])
 
@@ -1096,6 +1091,13 @@ class bool_circ(open_digraph):
             circ.add_output_id(id)
         return circ
 
+    def binary_from_registre(circ):
+        result = 0
+        for i, node in enumerate(reversed(circ.get_nodes())):
+            if node.get_label() == "1":
+                result += 2**i
+        return result
+
     def apply_copy_rule(self, data_node_id, cp_node_id):
         # Copy rule :
         # On copie simplement la valeur du parent (normalement un noeud copy
@@ -1181,6 +1183,9 @@ class bool_circ(open_digraph):
                       if (node.indegree() == 0 and node.outdegree() > 0)]
         # Tant qu'il y a des cofeuilles, c'est qu'on peut réduire
         while (cofeuilles):
+            # print(cofeuilles)
+            # print(self)
+            # print("\n\n\n")
             feuille_id = cofeuilles[0].get_id()
             # Case de base
             if (cofeuilles[0].get_label() not in ["0","1"]):
@@ -1209,6 +1214,7 @@ class bool_circ(open_digraph):
 
             if (len(cofeuilles[0].get_children_ids()) == 0):
                 cofeuilles.pop(0)
+        #    time.sleep(5)
 
     def adder(registre1, registre2, retenue):
 
@@ -1220,12 +1226,12 @@ class bool_circ(open_digraph):
             node1 = node(3, "" , []    , [5, 8])
             node2 = node(4, "" , []    , [5, 8])
             node3 = node(5, "^", [3, 4], [6]   )
-            node4 = node(6, "" , [5]   , [9, 10])
-            node5 = node(7, "" , []    , [9, 10])
-            node6 = node(8, "&", [3, 4], [11]   )
-            node7 = node(9, "&", [6, 7], [11]   )
-            node8 = node(10, "^", [6, 7], []    )
-            node9 = node(11, "|", [8, 9], []    )
+            node4 = node(6, "" , [5]   , [9, 11])
+            node5 = node(7, "" , []    , [9, 11])
+            node6 = node(8, "&", [3, 4], [10]   )
+            node7 = node(9, "&", [6, 7], [10]   )
+            node8 = node(10, "|", [8, 9], []    )
+            node9 = node(11, "^", [6, 7], []    )
             node_list = [node1, node2, node3,
                          node4, node5, node6,
                          node7, node8, node9]
@@ -1233,23 +1239,70 @@ class bool_circ(open_digraph):
             registre1.iparallel(registre2)
             registre1.iparallel(retenue)
             registre1.icompose(graphe_initial)
+            nodes = registre1.get_id_node_map()
+            sorted_list = dict(sorted(nodes.items(), key=lambda item: item[0]))
+            registre1.nodes = sorted_list
             registre1.reduce_eval()
             return registre1
 
+        else:
+            return
 
-    #    else:
-    #        registre11 = []
-    #        registre12 = []
-    #        registre21 = []
-    #        registre22 = []
-    #        for i in range(len(registre1)/2):
-    #            new_registre11.append(registre1[i])
-    #            new_registre12.append(registre1[i+len(registre1)])
-#            new_registre21.append(registre2[i])
-    #            new_registre22.append(registre2[i+len(registre2)])
-    #
-    #        retenue2, new_registre2 = adder(registre12, regitre22, retenue)
-    #        new_retenue, new_registre1 = adder(registre11, registre21, retenue2)
-    #
-    #
-    #
+    def Add1(registre1, registre2, retenue):
+
+        # On va chercher à découper le registre en deux parts égales
+        full_nodes_1 = registre1.get_nodes()
+        full_nodes_2 = registre2.get_nodes()
+
+        # On récupère la première moitié
+        first_nodes_1 = full_nodes_1[:(int)(len(full_nodes_1)/2)]
+        first_ids_1 = [node.get_id() for node in first_nodes_1]
+        first_nodes_2 = full_nodes_2[:(int)(len(full_nodes_2)/2)]
+        first_ids_2 = [node.get_id() for node in first_nodes_2]
+
+        # Et la seconde moitié
+        scd_nodes_1 = full_nodes_1[(int)(len(full_nodes_1)/2):]
+        scd_ids_1 = [node.get_id() for node in scd_nodes_1]
+        scd_nodes_2 = full_nodes_2[(int)(len(full_nodes_2)/2):]
+        scd_ids_2 = [node.get_id() for node in scd_nodes_2]
+
+        # On crée des sous registres qui ne contiennent que la seconde partie
+        second_half1 = bool_circ(open_digraph([], scd_ids_1, scd_nodes_1))
+        second_half2 = bool_circ(open_digraph([], scd_ids_2, scd_nodes_2))
+        # Et pour la première partie
+        first_half1 = bool_circ(open_digraph([], first_ids_1, first_nodes_1))
+        first_half2 = bool_circ(open_digraph([], first_ids_2, first_nodes_2))
+
+        if (len(second_half1.get_nodes()) == 1):
+            result = bool_circ.adder(second_half1, second_half2, retenue)
+        else:
+            result = bool_circ.Add1(second_half1, second_half2, retenue)
+
+        # On récupère la nouvelle retenue à appliquer
+        retenue2 = bool_circ(open_digraph([], [result.get_nodes()[0].get_id()], [result.get_nodes()[0]]))
+
+        if (len(first_half1.get_nodes()) == 1):
+            result2 = bool_circ.adder(first_half1, first_half2, retenue2)
+        else:
+            result2 = bool_circ.Add1(first_half1, first_half2, retenue2)
+
+        # On enlève le premier élément de result, car il a été utilisé dans la retenue
+        key_list = list(result.get_id_node_map())
+        result.get_id_node_map().pop(key_list[0])
+        id = result2.max_id()
+        # 
+        for node in result.get_nodes():
+            if node.get_id() in result2.get_node_ids():
+                id += 1
+                result.get_id_node_map().pop(node.get_id())
+                node.set_id(id)
+                result.get_id_node_map()[id] = node
+
+        registre = result2.get_nodes() + result.get_nodes()
+
+        ids = [node.get_id() for node in registre]
+
+        circ = bool_circ(open_digraph([], ids, registre))
+
+
+        return circ
