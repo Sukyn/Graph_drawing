@@ -1216,7 +1216,7 @@ class bool_circ(open_digraph):
                 cofeuilles.pop(0)
         #    time.sleep(5)
 
-    def adder(registre1, registre2, retenue):
+    def adder_basic(registre1, registre2, retenue):
 
         if( len(registre1.get_nodes()) != len(registre2.get_nodes()) ):
             print("the two registers don't have the same size")
@@ -1247,8 +1247,7 @@ class bool_circ(open_digraph):
 
         else:
             return
-
-    def Add1(registre1, registre2, retenue):
+    def adder(registre1, registre2, retenue):
 
         # On va chercher à découper le registre en deux parts égales
         full_nodes_1 = registre1.get_nodes()
@@ -1274,35 +1273,39 @@ class bool_circ(open_digraph):
         first_half2 = bool_circ(open_digraph([], first_ids_2, first_nodes_2))
 
         if (len(second_half1.get_nodes()) == 1):
-            result = bool_circ.adder(second_half1, second_half2, retenue)
+            result = bool_circ.adder_basic(second_half1, second_half2, retenue)
         else:
-            result = bool_circ.Add1(second_half1, second_half2, retenue)
+            result = bool_circ.adder(second_half1, second_half2, retenue)
 
         # On récupère la nouvelle retenue à appliquer
         retenue2 = bool_circ(open_digraph([], [result.get_nodes()[0].get_id()], [result.get_nodes()[0]]))
 
         if (len(first_half1.get_nodes()) == 1):
-            result2 = bool_circ.adder(first_half1, first_half2, retenue2)
+            result2 = bool_circ.adder_basic(first_half1, first_half2, retenue2)
         else:
-            result2 = bool_circ.Add1(first_half1, first_half2, retenue2)
+            result2 = bool_circ.adder(first_half1, first_half2, retenue2)
 
         # On enlève le premier élément de result, car il a été utilisé dans la retenue
         key_list = list(result.get_id_node_map())
         result.get_id_node_map().pop(key_list[0])
+
         id = result2.max_id()
-        # 
-        for node in result.get_nodes():
+        r2 = result2.get_nodes()
+        r1 = result.get_nodes()
+
+        for node in r1:
             if node.get_id() in result2.get_node_ids():
                 id += 1
-                result.get_id_node_map().pop(node.get_id())
+                while id in result.get_node_ids():
+                    id += 1
                 node.set_id(id)
-                result.get_id_node_map()[id] = node
 
-        registre = result2.get_nodes() + result.get_nodes()
 
+        registre = r2 + r1
         ids = [node.get_id() for node in registre]
-
         circ = bool_circ(open_digraph([], ids, registre))
-
-
+        #print("result = ", circ)
         return circ
+
+    def half_adder(registre1, registre2):
+        return bool_circ.adder(registre1, registre2, bool_circ.registre(0, 1))

@@ -1044,17 +1044,20 @@ class BoolCircTest(unittest.TestCase):
         self.assertEqual(len(rand_bool5.get_output_ids()), 2)
 
     def test_11_05(self):
-        x = 12
-        y = 2
-        z = 1
-        registre1 = bool_circ.registre(x)
-        self.assertEqual(bool_circ.binary_from_registre(registre1), x)
-        registre2 = bool_circ.registre(y)
-        self.assertEqual(bool_circ.binary_from_registre(registre2), y)
-        retenue = bool_circ.registre(z, 1)
-        self.assertEqual(bool_circ.binary_from_registre(retenue), z)
-        final = bool_circ.Add1(registre1, registre2, retenue)
-        self.assertEqual(bool_circ.binary_from_registre(final), x+y+z)
+        for x in range(20):
+            for y in range(20):
+                for z in range(2):
+                    registre1 = bool_circ.registre(x)
+                    self.assertEqual(bool_circ.binary_from_registre(registre1), x)
+                    registre2 = bool_circ.registre(y)
+                    self.assertEqual(bool_circ.binary_from_registre(registre2), y)
+                    retenue = bool_circ.registre(z, 1)
+                    self.assertEqual(bool_circ.binary_from_registre(retenue), z)
+
+                    final_adder = bool_circ.adder(registre1, registre2, retenue)
+                    final_half_adder = bool_circ.half_adder(registre1, registre2)
+                    self.assertEqual(bool_circ.binary_from_registre(final_adder), x+y+z)
+                    self.assertEqual(bool_circ.binary_from_registre(final_half_adder), x+y)
 
 if __name__ == '__main__':  # the following code is called only when
     unittest.main()         # precisely this file is run
