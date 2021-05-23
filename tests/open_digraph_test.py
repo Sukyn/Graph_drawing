@@ -1,10 +1,8 @@
 import sys
 import unittest
-import data
-from modules.open_digraph import *
-from modules.utils import *
 sys.path.append('../')  # allows us to fetch files from the project root
-
+from modules.open_digraph import *
+import data
 
 class InitTest(unittest.TestCase):
 
@@ -156,44 +154,6 @@ class NodeTest(unittest.TestCase):
         self.assertEqual(n0.get_children_ids(), [8])
         n0.remove_child_id(8)  # Removing
         self.assertEqual(n0.get_children_ids(), [])
-
-    # Test of indegree calculation
-    def test_indegree(self):
-        # The indegree of the node is the number
-        # of inputs it has
-
-        # We load nodes examples
-        node1, node2 = data.exemples_de_node()
-
-        # Checking that indegree are coherent with reality
-        self.assertEqual(node1.indegree(), 0)
-        self.assertEqual(node2.indegree(), 2)
-
-    # Test of outdegree calculation
-    def test_outdegree(self):
-        # The outdegree of the node is the number
-        # of outputs it has
-
-        # We load nodes examples
-        node1, node2 = data.exemples_de_node()
-
-        # Checking that outdegree are coherent with reality
-        self.assertEqual(node1.outdegree(), 7)
-        self.assertEqual(node2.outdegree(), 4)
-
-    # Test of degree calculation
-    def test_degree(self):
-        # The degree of the node is the number
-        # of outputs and inputs  it has
-
-        # We load nodes examples
-        node1, node2 = data.exemples_de_node()
-
-        # Checking that degree are coherent with reality
-        self.assertEqual(node1.degree(), node1.indegree() + node1.outdegree())
-        self.assertEqual(node1.degree(), 7)
-        self.assertEqual(node2.degree(), node2.indegree() + node2.outdegree())
-        self.assertEqual(node2.degree(), 6)
 
 
 class GraphTest(unittest.TestCase):
@@ -536,6 +496,53 @@ class GraphTest(unittest.TestCase):
         # We load another example graph
         h = data.cyclic_not_well_formed()
         self.assertEqual(h.min_outdegree(), 1)
+
+    # Test of indegree calculation
+    def test_indegree(self):
+        # The indegree of the node is the number
+        # of inputs it has
+
+        # We load nodes examples
+        graph = data.normal_graph()
+        node2 = graph.get_node_by_id(2)
+        node6 = graph.get_node_by_id(6)
+
+        # Checking that indegree are coherent with reality
+        self.assertEqual(graph.indegree(node2), 1)
+        self.assertEqual(graph.indegree(node6), 2)
+
+    # Test of outdegree calculation
+    def test_outdegree(self):
+        # The outdegree of the node is the number
+        # of outputs it has
+
+        # We load nodes examples
+        graph = data.normal_graph()
+        node6 = graph.get_node_by_id(6)
+        node7 = graph.get_node_by_id(7)
+
+        # Checking that outdegree are coherent with reality
+        self.assertEqual(graph.outdegree(node6), 2)
+        self.assertEqual(graph.outdegree(node7), 1)
+
+    # Test of degree calculation
+    def test_degree(self):
+        # The degree of the node is the number
+        # of outputs and inputs  it has
+
+        # We load nodes examples
+        graph = data.normal_graph()
+        node2 = graph.get_node_by_id(2)
+        node6 = graph.get_node_by_id(6)
+        node7 = graph.get_node_by_id(7)
+
+        # Checking that degree are coherent with reality
+        self.assertEqual(graph.degree(node2), graph.indegree(node2) + graph.outdegree(node2))
+        self.assertEqual(graph.degree(node2), 2)
+        self.assertEqual(graph.degree(node6), graph.indegree(node6) + graph.outdegree(node6))
+        self.assertEqual(graph.degree(node6), 4)
+        self.assertEqual(graph.degree(node7), graph.indegree(node7) + graph.outdegree(node7))
+        self.assertEqual(graph.degree(node7), 3)
 
     # Test of cyclicity checking
     def test_is_cyclic(self):
@@ -901,6 +908,24 @@ class GraphTest(unittest.TestCase):
         chemin, distance = g.longest_path(n0, n7)
         self.assertEqual(chemin, [0, 3, 5, 7])
         self.assertEqual(distance, 4)
+
+    def test_graph_from_adjancy_matrix(self):
+        m = utils.random_matrix(3,1)
+        print("\nmatrice :")
+        for line in m:
+            print(line)
+        g = open_digraph.graph_from_adjacency_matrix(m)
+        print("\ngraphe :")
+        print(g)
+
+
+    def test_random_graph(self):
+        node1 = node(1,"first node",[],[])
+        node2 = node(2,"second node",[],[])
+        graph = open_digraph.random_graph(3, 1, [node1], [node2])
+
+        print("\n")
+        print(graph)
 
 
 

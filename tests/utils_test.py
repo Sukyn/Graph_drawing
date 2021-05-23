@@ -2,7 +2,6 @@ import sys
 sys.path.append('../') # allows us to fetch files from the project root
 import unittest
 from modules.utils import *
-import modules.open_digraph as odgraph
 
 class FunctionTest(unittest.TestCase):
     def remove_all_test(self):
@@ -71,23 +70,6 @@ class FunctionTest(unittest.TestCase):
         #assertEqual(matrix5[2][0],0)
         #assertEqual(matrix5[2][1],0)
 
-    def test_graph_from_adjancy_matrix(self):
-        m = random_matrix(3,1)
-        print("\nmatrice :")
-        for line in m:
-            print(line)
-        g = graph_from_adjacency_matrix(m)
-        print("\ngraphe :")
-        print(g)
-
-
-    def test_random_graph(self):
-        node1 = odgraph.node(1,"first node",[],[])
-        node2 = odgraph.node(2,"second node",[],[])
-        graph = random_graph(3, 1, [node1], [node2])
-
-        print("\n")
-        print(graph)
 
 
 

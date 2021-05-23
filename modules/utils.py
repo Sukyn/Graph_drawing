@@ -1,7 +1,4 @@
 import random
-import sys
-sys.path.append('../')
-import modules.open_digraph as odgraph
 
 def remove_all(l, x):
     while(x in l):
@@ -39,45 +36,6 @@ def random_matrix(n, bound, null_diag=False, symetric=False, oriented=False, tri
                 matrix[j][i] = 0
 
     return matrix
-
-
-def graph_from_adjacency_matrix(matrix):
-    node_list = [odgraph.node(i, '{}'.format(i), [], []) for i in range(len(matrix))]
-    for i in range(len(matrix)):
-        for j in range(len(matrix)):
-            for k in range(matrix[i][j]):
-                node_list[j].add_parent_id(i)
-                node_list[i].add_child_id(j)
-    return odgraph.open_digraph([], [], node_list)
-
-
-
-def random_graph(n, bound, inputs=[], outputs=[], form="free"):
-    '''
-    pour form on a differentes options :
-        "free": un graphe quelconque
-        "DAG" : un graphe dirige acyclique
-        "oriented" : un graphe oriente
-        "undirected" : un graphe non dirige
-        "loop-free undirected" : ___________
-    '''
-    if (form == "free"):
-        graphe = graph_from_adjacency_matrix( random_matrix(n, bound) )
-    elif (form == "DAG"):
-        graphe = graph_from_adjacency_matrix( random_matrix(n, bound, triangular = True, null_diag = True) )
-    elif (form == "oriented"):
-        graphe = graph_from_adjacency_matrix( random_matrix(n, bound, oriented = True) )
-    elif (form == "undirected"):
-        graphe = graph_from_adjacency_matrix( random_matrix(n, bound, oriented = False) )
-    elif (form == "loop-free undirected"):
-        graphe = graph_from_adjacency_matrix( random_matrix(n, bound, null_diag = True) )
-    else:
-        print("Invalid parameters")
-        return
-
-    graphe.set_input_ids(inputs)
-    graphe.set_output_ids(outputs)
-    return graphe
 
 def invert_permutation(permutation):
     first = permutation.copy().pop(len(permutation)-1)

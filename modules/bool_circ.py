@@ -77,19 +77,19 @@ class bool_circ(open_digraph):
             if ( label == "&" or
                  label == "^" or
                  label == "|" ):
-                if (node.outdegree() != 1):
+                if (self.outdegree(node) != 1):
                     return False
             elif (label == "0" or label == "1"):
-                if (node.indegree() > 0):
+                if (self.indegree(node) > 0):
                     return False
             elif (label == "~"):
-                if (node.indegree() != 1 or node.outdegree() != 1):
+                if (self.indegree(node) != 1 or self.outdegree(node) != 1):
                     return False
             elif (label == ""):
-                if (node.indegree() != 1):
+                if (self.indegree(node) != 1):
                     return False
             else:
-                if (node.outdegree() != 1 or node.indegree() != 1):
+                if (self.outdegree(node) != 1 or self.indegree(node) != 1):
                     return False
         if self.is_cyclic():
             return False
@@ -107,8 +107,8 @@ class bool_circ(open_digraph):
         and a number outputs > 0 of outputs
         '''
         # create a random graph
-        graph = utils.random_graph(node_number, 1, [], [], "DAG")
-        # to have indegree and maxdegree > 0
+        graph = open_digraph.random_graph(node_number, 1, [], [], "DAG")
+        # to have indegree and maxdegree > 0S
         for node_anonymous in graph.get_nodes():
             # reset the label
             node_anonymous.set_label("")
@@ -172,20 +172,20 @@ class bool_circ(open_digraph):
 
         # we will change all of the labels
         for node_anonymous in graph.get_nodes():
-            if (node_anonymous.indegree() == 1 and
-                    node_anonymous.outdegree() == 1):
+            if (graph.indegree(node_anonymous) == 1 and
+                (graph.outdegree(node_anonymous) == 1):
                 # we make a not node
                 node_anonymous.set_label("~")
-            elif (node_anonymous.indegree() == 1 and
-                    node_anonymous.outdegree() > 1):
+            elif (graph.indegree(node_anonymous) == 1 and
+                (graph.outdegree(node_anonymous) > 1):
                 # we make a copy node
                 pass
-            elif (node_anonymous.indegree() > 1 and
-                    node_anonymous.outdegree() == 1):
+            elif (graph.indegree(node_anonymous) > 1 and
+                (graph.outdegree(node_anonymous) == 1):
                 # we make a or or and node
                 node_anonymous.set_label(random.choice(["&", "|"]))
-            elif (node_anonymous.indegree() > 1 and
-                    node_anonymous.outdegree() > 1):
+            elif (graph.indegree(node_anonymous) > 1 and
+                (graph.outdegree(node_anonymous) > 1):
                 # take the parents of the node
                 nodeParents = node_anonymous.get_parent_ids().copy()
                 # create an intermediar node
@@ -320,7 +320,7 @@ class bool_circ(open_digraph):
     def reduce_eval(self):
         # Une cofeuille c'est un noeud qui n'a pas de parents, mais des enfants
         cofeuilles = [node for node in self.get_nodes()
-                      if (node.indegree() == 0 and node.outdegree() > 0)]
+                      if (self.indegree(node) == 0 and self.outdegree(node) > 0)]
         # Tant qu'il y a des cofeuilles, c'est qu'on peut réduire
         while (cofeuilles):
             # print(cofeuilles)
@@ -345,11 +345,11 @@ class bool_circ(open_digraph):
                 if (operation == "~"):
                     self.apply_not_rule(feuille_id, operation_id)
 
-                if (self.get_node_by_id(operation_id).indegree() == 0):
+                if (self.indegree(self.get_node_by_id(operation_id)) == 0):
                     cofeuilles.append(self.get_node_by_id(operation_id))
 
                 for node in self.get_nodes():
-                    if (node.outdegree() == 0):
+                    if (self.outdegree(node) == 0):
                         self.remove_node_by_id(node.get_id())
 
             if (len(cofeuilles[0].get_children_ids()) == 0):

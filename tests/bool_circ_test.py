@@ -1,9 +1,8 @@
 import sys
 import unittest
-import data
-from modules.bool_circ import *
-from modules.utils import *
 sys.path.append('../')  # allows us to fetch files from the project root
+from modules.bool_circ import *
+import data
 
 class BoolCircTest(unittest.TestCase):
 
@@ -146,8 +145,8 @@ class BoolCircTest(unittest.TestCase):
         self.assertEqual(len(rand_bool5.get_output_ids()), 2)
 
     def test_11_05(self):
-        for x in range(20):
-            for y in range(20):
+        for x in range(2):
+            for y in range(2):
                 for z in range(2):
                     registre1 = bool_circ.registre(x)
                     self.assertEqual(bool_circ.binary_from_registre(registre1), x)
