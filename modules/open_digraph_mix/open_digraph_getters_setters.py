@@ -48,7 +48,10 @@ class open_digraph_getters_setters:
         returns the maximum indegree of the graph,
         i.e. the maximum of each node's indegree
         '''
-        return max([self.indegree(node) for node in self.get_nodes()])
+        if not self.get_id_node_map():
+            return 0
+        else:
+            return max([self.indegree(node) for node in self.get_nodes()])
 
     def min_indegree(self):
         '''
@@ -56,7 +59,10 @@ class open_digraph_getters_setters:
         returns the minimum indegree of the graph,
         i.e. the minimum of each node's indegree
         '''
-        return min([self.indegree(node) for node in self.get_nodes()])
+        if not self.get_id_node_map():
+            return 0
+        else:
+            return min([self.indegree(node) for node in self.get_nodes()])
 
     def max_outdegree(self):
         '''
@@ -64,7 +70,10 @@ class open_digraph_getters_setters:
         returns the maximum outdegree of the graph,
         i.e. the maximum of each node's outdegree
         '''
-        return max([self.outdegree(node) for node in self.get_nodes()])
+        if not self.get_id_node_map():
+            return 0
+        else:
+            return max([self.outdegree(node) for node in self.get_nodes()])
 
     def min_outdegree(self):
         '''
@@ -72,21 +81,30 @@ class open_digraph_getters_setters:
         returns the minimum indegree of the graph,
         i.e. the minimum of each node's outdegree
         '''
-        return min([self.outdegree(node) for node in self.get_nodes()])
+        if not self.get_id_node_map():
+            return 0
+        else:
+            return min([self.outdegree(node) for node in self.get_nodes()])
 
     def min_id(self):
         '''
         **TYPE** int
         returns the min of all nodes id
         '''
-        return min(self.get_node_ids())
+        if not self.get_id_node_map():
+            return 0
+        else:
+            return min(self.get_node_ids())
 
     def max_id(self):
         '''
         **TYPE** int
         returns the max of all nodes id
         '''
-        return max(self.get_node_ids())
+        if not self.get_id_node_map():
+            return 0
+        else:
+            return max(self.get_node_ids())
 
     # ----- SETTERS -----
     # functions to modify the attributes of the object
