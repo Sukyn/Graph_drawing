@@ -219,14 +219,14 @@ class open_digraph(open_digraph_getters_setters,
         return True if the graph is well formed
         '''
         # List of valid labels
-        valid_label = ["&", "|", "∼", "^", "0", "1", ""]
+        valid_label = ["&", "|", "∼", "^", ""]
 
         # Getting every id of nodes in the graph
         nodes_ids = self.get_id_node_map()
         for node_id in nodes_ids:
 
             # Checking that labels are valid
-            if nodes_ids[node_id].get_label() not in valid_label:
+            if nodes_ids[node_id].get_label() in valid_label:
                 return False
 
             # Checking that keys and nodes are linked

@@ -29,7 +29,7 @@ class point:
         '''
         **TYPE** point
         function that defines how to add two points'''
-        return point(self.x + p2.x, self.x + p2.y)
+        return point(self.x + p2.x, self.y + p2.y)
 
     def __rmul__(self, s):
         '''
@@ -44,7 +44,7 @@ class point:
         '''
         **TYPE** point
         function that defines the substraction of two points'''
-        return point(self.x - p2.x, self.x - p2.y)
+        return point(self.x - p2.x, self.y - p2.y)
 
     def equal(self, p2):
         '''
@@ -61,13 +61,13 @@ class point:
         rotation angle theta around the center c
         '''
         if c is None:
-            c = point(width/2, height/2)
+            c = point(200, 200)
         x_t = self.x - c.x
         y_t = self.y - c.y
 
         x = x_t*math.cos(theta) + y_t*math.sin(theta) + c.x
         y = -x_t*math.sin(theta) + y_t*math.cos(theta) + c.y
-        return (x, y)
+        return point(x, y)
 
 
 def drawarrows(self, p1, p2, edge_number_1_to_2=1, edge_number_2_to_1=0):
@@ -210,6 +210,10 @@ ImageDraw.ImageDraw.graph = drawgraph
 
 
 def random_layout(graph, width, height):
+    '''
+    **TYPE** point list * point list * point list
+    function that returns random positions for nodes in a graph
+    '''
     node_ids = graph.get_node_ids()  # node ids list
     nbr = len(node_ids)              # number of node
     node_pos = {}
@@ -316,7 +320,6 @@ def Bezier(self, p0, paux, p1, dt=0.01):
     '''
     for t in np.arange(0, 0.9, dt) :
         B = (1-t)*((1-t)*p0 + t*paux) + t*((1-t)*paux + t*p1)
-        print(B)
         Bsuiv = (1-(t+dt))*((1-(t+dt))*p0 + (t+dt)*paux) + (t+dt)*((1-(t+dt))*paux + (t+dt)*p1)
         self.line([B.n(), Bsuiv.n()], 'black')
 
