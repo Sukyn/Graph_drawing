@@ -277,12 +277,10 @@ class open_digraph(open_digraph_getters_setters,
                                        j)
                 for i in range(n)] for j in range(n)]
 
-    def is_cyclic(self):
-        '''
+    '''def is_cyclic(self):
         **TYPE** boolean
         TRUE if the graph is cyclic
         cyclic means that there is a path from a node to itself
-        '''
         # We make a copy to avoid removing nodes to the graph
         graph = self.copy()
 
@@ -305,7 +303,36 @@ class open_digraph(open_digraph_getters_setters,
                 # it means that the graph is a cycle
                 return True
 
-        return sub_is_cyclic(graph)
+        return sub_is_cyclic(graph)'''
+
+    def is_cyclic(self):
+        '''
+        **TYPE** boolean
+        TRUE if the graph is cyclic
+        cyclic means that there is a path from a node to itself
+        '''
+        leafs = []
+        not_leafs = {}
+        # We keep the nodes that are leaves and the nodes that are not
+        for node in self.get_nodes():
+            nbr_children = len(node.get_children_ids())
+            if nbr_children > 0:
+                not_leafs[node.get_id()] = nbr_children
+            else:
+                leafs.append(node.get_id())
+        # We remove all the leaves
+        while len(leafs) != 0:
+            remove_leaf = leafs.pop()
+            for parent in self.get_node_by_id(remove_leaf).get_parent_ids():
+                not_leafs[parent] -= 1
+                # If the parent had only the removed leaf as a child then it is added to the list of leaves
+                if not_leafs[parent] == 0:
+                    not_leafs.pop(parent)
+                    leafs.append(parent)
+        # If there are still nodes in the graph, the graph is cyclic
+        return (len(not_leafs) > 0)
+
+
 
     def graph_from_adjacency_matrix(matrix):
         node_list = [node(i, '{}'.format(i), [], []) for i in range(len(matrix))]
