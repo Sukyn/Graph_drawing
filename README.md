@@ -1,5 +1,6 @@
-# ProjetInfo
 Projet Info - Semestre 4 LDD2
 
 
-pelouse
+Colin BLAKE
+Gwendal CASTA
+Taliesin ROMANET
