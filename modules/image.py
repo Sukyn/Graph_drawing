@@ -328,7 +328,7 @@ def Bezier(self, p0, paux, p1, dt=0.01):
 
 ImageDraw.ImageDraw.Bezier = Bezier
 
-'''TD5'''
+'''TD5 (beginning)'''
 def force_based_layout(g, nb_iter=50, animation_file=None):
     node1 = odgraph.node(27, "aze", [], [])
     node2 = odgraph.node(13, "rty", [], [])
