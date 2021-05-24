@@ -438,16 +438,6 @@ class GraphTest(unittest.TestCase):
         # after a normalization it should be 0,1,2
         # but with the exact same properties
         matrix = g_good.adjacency_matrix()
-        '''
-        # TO DO ------
-        # TO DO ------
-        # TO DO ------
-        # TO DO ------
-        # TO DO ------
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        '''
 
     # ----- Test of degree checking -----
     # MAX IN
@@ -795,19 +785,6 @@ class GraphTest(unittest.TestCase):
         self.assertEqual(components[2].get_node_ids(), [4])
         self.assertEqual(components[3].get_node_ids(), [5, 6, 7])
         self.assertEqual(components[4].get_node_ids(), [8, 9, 10, 11])
-        '''
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        # TO DO -----
-        '''
         # Avis Colin : Je crois que le fait de toujours sort les getters
         #              pour avoir des résultats standardisés bloque
         #              les permutations
@@ -911,21 +888,20 @@ class GraphTest(unittest.TestCase):
 
     def test_graph_from_adjancy_matrix(self):
         m = utils.random_matrix(3,1)
-        print("\nmatrice :")
+        '''print("\nmatrice :")
         for line in m:
-            print(line)
+            print(line)'''
         g = open_digraph.graph_from_adjacency_matrix(m)
-        print("\ngraphe :")
-        print(g)
+        '''print("\ngraphe :")
+        print(g)'''
 
 
     def test_random_graph(self):
         node1 = node(1,"first node",[],[])
         node2 = node(2,"second node",[],[])
         graph = open_digraph.random_graph(3, 1, [node1], [node2])
-
-        print("\n")
-        print(graph)
+        '''print("\n")
+        print(graph)'''
 
 
 

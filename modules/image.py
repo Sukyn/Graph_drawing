@@ -69,6 +69,9 @@ class point:
         y = -x_t*math.sin(theta) + y_t*math.cos(theta) + c.y
         return point(x, y)
 
+    def dist(self, p):
+        return point(p.x-self.x, p.y-self.y)
+
 
 def drawarrows(self, p1, p2, edge_number_1_to_2=1, edge_number_2_to_1=0):
     '''
@@ -324,3 +327,34 @@ def Bezier(self, p0, paux, p1, dt=0.01):
         self.line([B.n(), Bsuiv.n()], 'black')
 
 ImageDraw.ImageDraw.Bezier = Bezier
+
+'''TD5'''
+def force_based_layout(g, nb_iter=50, animation_file=None):
+    node1 = odgraph.node(27, "aze", [], [])
+    node2 = odgraph.node(13, "rty", [], [])
+    node3 = odgraph.node(-27, "uio", [], [])
+    node4 = odgraph.node(42, "", [], [])
+    node5 = odgraph.node(18, "S", [], [])
+
+    nodeList = [node1, node2, node3, node4, node5]
+    g = odgraph.open_digraph([27], [18], nodeList)
+    g.add_edges([27, 13, 18], [42, 27, 13])
+
+    L = 5 # spring no-load length
+    k =  10 # spring stiffness
+    Q = 5000000 # particle interaction constant
+    dt = 0.01 # time step
+    max_speed = 100000 # a bound on the speed of the particles
+    pos = random_layout(g, 400, 400) # an random layout of the nodes
+    speed = {i:point(0,0) for i in g.get_node_ids()} # a map of the ids to the null speed
+    def spring_force(id1, id2):
+    # will be completed in the following
+        pass
+    def repulsive_force(id1, id2):
+    # will be completed in the following
+        pass
+    #for it in range(nb_iter):
+    # the main loop
+    # computation of the forces and updating of the speeds
+    # updating of the positions
+    return pos # we return the final position of our nodes

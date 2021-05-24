@@ -307,9 +307,10 @@ class open_digraph(open_digraph_getters_setters,
 
     def is_cyclic(self):
         '''
+        --Optimized version--
         **TYPE** boolean
         TRUE if the graph is cyclic
-        cyclic means that there is a path from a node to itself
+        cyclic means that there is a path from a node @@ itself
         '''
         leafs = []
         not_leafs = {}
